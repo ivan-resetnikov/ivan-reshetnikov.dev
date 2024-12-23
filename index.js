@@ -49,22 +49,25 @@ async function loadJSONFile(filePath) {
     }
 }
 
-function loadProjectCards() {
+async function loadProjectCards() {
     const cardContainer = document.getElementById("card-container");
 
-    loadJSONFile("db://projects/manifest.json")
-    .then(manifest => {
-        manifest.projectList.forEach(projectsID => {
-            loadJSONFile(`db://projects/${projectsID}/meta.json`)
-            .then(projectMetadata => {
-                addProjectCard(cardContainer, projectsID, projectMetadata);
-            })
-            .catch(error => {
-                console.error(`Could not load project '${projectsID}' metadata!`);
-            });
-        });
-    })
+    try {
+        const manifest = await loadJSONFile("db://projects/manifest.json");
+
+        for (const projectID of manifest.projectList) {
+            try {
+                const projectMetadata = await loadJSONFile(`db://projects/${projectID}/meta.json`);
+                addProjectCard(cardContainer, projectID, projectMetadata);
+            } catch (error) {
+                console.error(`Could not load project '${projectID}' metadata!`);
+            }
+        }
+    } catch (error) {
+        console.error("Could not load project manifest!", error);
+    }
 }
+
 
 loadProjectCards();
 
