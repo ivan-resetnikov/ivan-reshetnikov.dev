@@ -10,6 +10,7 @@
 .card-container .card {
     flex: 0 0 auto;
     width: 512px;
+    max-width: 80vw;
     border-radius: 16px;
     overflow: hidden;
     background-color: #333;
@@ -20,6 +21,7 @@
     margin: 16px;
     display: flex;
     justify-content: space-between;
+    scroll-snap-align: start;
 }
 
 .card-container .card .tip {
