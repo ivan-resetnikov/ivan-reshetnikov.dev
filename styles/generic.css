@@ -41,6 +41,7 @@ main {
 
 .page-cover .title-container {
     z-index: 1;
+    padding: 16px;
 }
 
 .page-cover .title-container .title {

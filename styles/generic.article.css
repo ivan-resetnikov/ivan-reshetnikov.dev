@@ -43,7 +43,7 @@ pre code {
 }
 
 #discussion iframe {
-    border: none !important;
+    border: none !important;  /* Override Firefox default styling */
 }
 
 .responsive-image {
