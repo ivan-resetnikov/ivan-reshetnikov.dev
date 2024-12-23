@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 256 256"
+   preserveAspectRatio="xMidYMid"
+   version="1.1"
+   id="svg4"
+   sodipodi:docname="trello.svg"
+   inkscape:version="1.3.2 (091e20e, 2023-11-25, custom)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview4"
+     pagecolor="#ffffff"
+     bordercolor="#999999"
+     borderopacity="1"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="1.11375"
+     inkscape:cx="400"
+     inkscape:cy="400"
+     inkscape:window-width="1920"
+     inkscape:window-height="1129"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <defs
+     id="defs2">
+    <linearGradient
+       x1="50%"
+       y1="0%"
+       x2="50%"
+       y2="100%"
+       id="a">
+      <stop
+         stop-color="#0091E6"
+         offset="0%"
+         id="stop1" />
+      <stop
+         stop-color="#0079BF"
+         offset="100%"
+         id="stop2" />
+    </linearGradient>
+  </defs>
+  <path
+     id="rect2"
+     style="fill:url(#a)"
+     d="M 25 0 C 11.150028 0 0 11.150028 0 25 L 0 231 C 0 244.84998 11.150028 256 25 256 L 231 256 C 244.84998 256 256 244.84998 256 231 L 256 25 C 256 11.150028 244.84998 0 231 0 L 25 0 z M 45.28 33.28 L 99.36 33.28 C 106.00798 33.28 111.36 38.632014 111.36 45.28 L 111.36 197.28 C 111.36 203.92798 106.00798 209.28 99.36 209.28 L 45.28 209.28 C 38.632014 209.28 33.28 203.92798 33.28 197.28 L 33.28 45.28 C 33.28 38.632014 38.632014 33.28 45.28 33.28 z M 156.64 33.28 L 210.72 33.28 C 217.36799 33.28 222.72 38.632007 222.72 45.28 L 222.72 133.28 C 222.72 139.92799 217.36799 145.28 210.72 145.28 L 156.64 145.28 C 149.99201 145.28 144.64 139.92799 144.64 133.28 L 144.64 45.28 C 144.64 38.632007 149.99201 33.28 156.64 33.28 z " />
+</svg>

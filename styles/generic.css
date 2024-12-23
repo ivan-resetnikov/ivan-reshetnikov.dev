@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+
+/* Global */
+
+body {
+    background-color: #222;
+    color: #b3b3b3;
+
+    font-family: "Inter", system-ui;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    font-style: normal;
+
+    font-size: 16px;
+    line-height: 1.4;
+    text-shadow: 0 1px 0 #333;
+    margin: 0;
+}
+
+main {
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 1000px;
+
+    padding: 16px;
+}
+
+/* Page cover */
+
+.page-cover {
+    width: 100vw;
+    height: 512px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+.page-cover .title-container {
+    z-index: 1;
+}
+
+.page-cover .title-container .title {
+    margin: 0;
+    color: #f2f2f2;
+    font-size: 64px;
+    text-shadow:
+        0px 0px 5px #000,
+        0px 0px 5px #000,
+}
+
+.page-cover .title-container .sub-title {
+    margin: 0;
+    font-size: 32px;
+    text-shadow:
+        0px 0px 5px #000,
+        0px 0px 5px #000,
+}
+
+.page-cover .darken-layer {
+    position: absolute;
+    width: 100vw;
+    height: 512px;
+    background-color: rgba(0.0, 0.0, 0.0, 0.5);
+}
+
+
+/* Colors and decorations */
+
+h1 {
+    color: #f2f2f2;
+}
+
+h2 {
+    color: #f2f2f2;
+}
+
+a {
+    text-decoration: underline;
+    color: #f2f2f2;
+}
+
+.accent {
+    color: #D367E0;
+    font-style: italic;
+    text-decoration: underline;
+}
+
+.sub-accent {
+    color: #D367E0;
+}
+
+/* Light mode overrides */
+
+.light-mode {
+    background-color: #f6f6f6;
+    color: #555;
+    text-shadow: 0 1px 0 #e4e4e4;
+}
+
+.light-mode a {
+    text-decoration: underline;
+    color: #353535;
+}
+
+.light-mode h1 {
+    color: #353535;
+}
+
+.light-mode h2 {
+    color: #3f3f3f;
+}
+
+/* Positioning */
+
+.no-bottom-separation {
+    margin-bottom: 0px;
+}
+
+.no-top-separation {
+    margin-top: 0px;
+}
+
+.indent-1 {
+    margin-left: 32px;
+}
+
+.indent-1 ul {
+    padding-left: 0px;
+}
+
+/* MathJax */
+
+.math {
+    color: #f2f2f2;
+}
