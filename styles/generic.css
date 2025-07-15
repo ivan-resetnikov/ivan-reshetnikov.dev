@@ -1,140 +1,126 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap');
+@font-face {
+  font-family: "ndot45";
+  src: url("../fonts/ndot_45/ndot_45.woff2");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "space_grotesk";
+  src: url("../fonts/space_grotesk/regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "space_mono";
+  src: url("../fonts/space_mono/regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "pt_serif";
+  src: url("../fonts/pt_serif/regular.ttf");
+  font-weight: normal;
+  font-style: normal;
+}
 
 /* Global */
+* {
+    margin: 0;
+    padding: 0;
+
+    color: #ddd;
+
+    /* Reading font */
+    font-family: "space_grotesk", sans-serif;
+    font-optical-sizing: auto;
+    line-height: 1.4;
+}
+
+/* Title font */
+h1 { font-family: 'space_mono'; margin-bottom: 1rem; }
+h2 { font-family: 'pt_serif'; margin-bottom: 1rem; }
+h3 { font-family: 'space_mono'; margin-bottom: 1rem; }
+h4 { font-family: 'space_mono'; margin-bottom: 1rem; }
+h5 { font-family: 'space_mono'; margin-bottom: 1rem; }
+h6 { font-family: 'space_mono'; margin-bottom: 1rem; }
 
 body {
-    background-color: #222;
-    color: #b3b3b3;
-
-    font-family: "Inter", system-ui;
-    font-optical-sizing: auto;
-    font-weight: normal;
-    font-style: normal;
-
-    font-size: 16px;
-    line-height: 1.4;
-    text-shadow: 0 1px 0 #333;
-    margin: 0;
+    background-color: #14151f;
 }
 
-main {
+main div {
+    background-color: #000;
+
+    width: 50vw;
     margin-left: auto;
     margin-right: auto;
-    max-width: 1000px;
 
-    padding: 16px;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
 }
 
-/* Page cover */
-
-.page-cover {
-    width: 100vw;
-    height: 512px;
-
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    background-repeat: no-repeat;
-    background-position: center;
+ul {
+    padding-left: 1rem;
 }
 
-.page-cover .title-container {
-    z-index: 1;
-    padding: 16px;
+li::marker {
+    content: "⠿ ";
+    color: #ff0000;
 }
 
-.page-cover .title-container .title {
-    margin: 0;
-    color: #f2f2f2;
-    font-size: 64px;
-    text-shadow:
-        0px 0px 5px #000,
-        0px 0px 5px #000,
+.highlight {
+    color: #ff0000;
+    text-decoration: underline;
+    text-shadow: 0;
 }
 
-.page-cover .title-container .sub-title {
-    margin: 0;
-    font-size: 32px;
-    text-shadow:
-        0px 0px 5px #000,
-        0px 0px 5px #000,
+.un-highlight {
+    color: rgba(255, 255, 255, 0.5);
 }
 
-.page-cover .darken-layer {
-    position: absolute;
-    width: 100vw;
-    height: 512px;
-    background-color: rgba(0.0, 0.0, 0.0, 0.5);
-}
+.circle {
+    padding: 0;
+    display: inline-block;
 
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+    background-color: #ff0000;
 
-/* Colors and decorations */
-
-h1 {
-    color: #f2f2f2;
-}
-
-h2 {
-    color: #f2f2f2;
+    margin-right: 1rem;
 }
 
 a {
     text-decoration: underline;
-    color: #f2f2f2;
 }
 
-.accent {
-    color: #D367E0;
-    font-style: italic;
-    text-decoration: underline;
+a:hover {
+    color: #ff0000;
 }
 
-.sub-accent {
-    color: #D367E0;
+/* Font overrides */
+.font-ndot45 {
+    font-family: "ndot45", sans-serif;
+    font-optical-sizing: auto;
+    text-shadow: 0;
+    font-variation-settings: "ROND" 0;
 }
 
-/* Light mode overrides */
-
-.light-mode {
-    background-color: #f6f6f6;
-    color: #555;
-    text-shadow: 0 1px 0 #e4e4e4;
+.font-space-grotesk {
+    font-family: "space_grotesk", sans-serif;
+    font-optical-sizing: auto;
 }
 
-.light-mode a {
-    text-decoration: underline;
-    color: #353535;
+.font-space-mono {
+    font-family: "space_mono", sans-serif;
+    font-optical-sizing: auto;
 }
 
-.light-mode h1 {
-    color: #353535;
-}
-
-.light-mode h2 {
-    color: #3f3f3f;
-}
-
-/* Positioning */
-
-.no-bottom-separation {
-    margin-bottom: 0px;
-}
-
-.no-top-separation {
-    margin-top: 0px;
-}
-
-.indent-1 {
-    margin-left: 32px;
-}
-
-.indent-1 ul {
-    padding-left: 0px;
-}
-
-/* MathJax */
-
-.math {
-    color: #f2f2f2;
+.font-pt-serif {
+    font-family: "pt_serif", sans-serif;
+    font-optical-sizing: auto;
 }
