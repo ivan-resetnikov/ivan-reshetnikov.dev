@@ -61,13 +61,15 @@ function populateWebsiteModeDropdown(currentMode) {
         `
     });
 
+    // Current mode text
+    const currentModeDesc = currentMode in WEBSITE_MODE_DESCRIPTIONS ? WEBSITE_MODE_DESCRIPTIONS[currentMode] : "";
     dropDownElement.innerHTML = `
         <h1>${currentMode.toUpperCase()}</h1>
-        <p>${WEBSITE_MODE_DESCRIPTIONS[currentMode]}</p>
+        <p>${currentModeDesc}</p>
         <div class="content">
             ${modeListInnerHTML}
         </div>
-    `
+    `;
 
     // Detect click on any mode entry
     document.querySelector('.drop-down .content').addEventListener('click', function(event) {
@@ -89,10 +91,20 @@ function populateWebsiteModeDropdown(currentMode) {
     });
 }
 
-// Navigation hander, because the website operates on loading & unloading the content in <body> instead of reloading the entire page (Which flashes the user with white)
+// Check if page script exists then add as child if exists
+async function loadPageScriptIfAvailible(appRoot, page) {
+    const url = `/scripts/${page.replace(".html", ".js")}`;
+
+    const script = document.createElement("script");
+    script.src = url;
+    script.defer = true;
+    document.body.appendChild(script);
+}
+    
+
+// Navigation handler, because the website operates on loading & unloading the content in <body> instead of reloading the entire page (Which flashes the user with white)
 async function setPage(page) {
     const url = `/pages/${page}`;
-    console.log(url);
     const response = await fetch(url);
     if (!response.ok) {
         log.error("Could not find requested page");
@@ -108,6 +120,7 @@ async function setPage(page) {
 
     if (newContent && appRoot) {
         appRoot.innerHTML = newContent.innerHTML;
+        loadPageScriptIfAvailible(appRoot, page);
     } else {
         console.error("Failed to find page-content in fetched page");
     }
@@ -137,6 +150,17 @@ function setPageFromURL() {
                 setPage("cooking.html");
             } else {
                 setPage(`cooking_${recipe}.html`);
+            }
+
+            break;
+    
+        case "article":
+            var article_id = urlParams.get("id");
+
+            if (article_id == null) {
+                setPage("articles.html");
+            } else {
+                setPage(`article_${article_id}.html`);
             }
 
             break;
