@@ -11,139 +11,45 @@
     <link rel="icon" href="images/favicon.png" type="image/png">
     
     <link rel="stylesheet" href="styles/generic.css">
-    <link rel="stylesheet" href="styles/index.css">
+    <link rel="stylesheet" href="styles/professional.css">
+    <link rel="stylesheet" href="styles/cooking.css">
 </head>
 <body>
     <header>
         <div class="container">
-            <h1 class="font-ndot45">IVAN RESHETNIKOV</h1>
-            <p>Engine Developer & Gameplay Programmer</p>
-        </div>
-    </header>
-
-    <main>
-        <div class="banner">
-
-        </div>
-
-        <div>
-            <h2>I make <span class="highlight">game engines</span>, <span class="highlight">games</span> and <span class="highlight">software</span>.</h2>
-
-            <p>I am a professional gameplay developer at Abydos Games AB.</p>
-            <p>I enjoy graphics programming, and low level game developement.</p>
-            <p>I write software to support my work.</p>
-
-            <!-- <p>Sometimes I write articles about graphics programming, game engines, algorithm implemenations, and cool projects.</p> -->
-        </div>
-
-        <div>
-            <h2>Articles</h2>
-            <ul>
-                <li><a href="#">Setting up SDL3 and OpenGL ES on Android</a></li>
-                <li><a href="#">Directional shadow mapping & PCF filtering</a></li>
-                <li><a href="#">PBR rendering</a></li>
-                <li><a href="#">Voxel terrain mesh generation</a></li>
-                <li><a href="#">Performant Sub-Surface Scattering Approximation</a></li>
-                <li><a href="#">Slang Shading Language Translator Overview</a></li>
-                <li><a href="#">Height blended materials maps</a></li>
-            </ul>
-        </div>
-
-        <div>
-            <h2>History</h2>
-            <div class="history">
-                <div class="work">
-                    <h1 style="display: flex; align-items: center;">
-                        <span class="font-ndot45" >Work</span>
-                        <span class="font-space-grotesk un-highlight" style="margin-left: 1rem; font-size: medium;">• Employed</span>
-                    </h2>
-
-                    <div class="entry">
-                        <h3 class="font-space-grotesk">Abydos Games AB • Gameplayer Developer</h3>
-                        <p>
-                            Dec 2023 - Present
-                            <span class="un-highlight" style="margin-left: 0.5rem; margin-right: 0.5rem;"> /// </span>
-                            <span class="time-period-label" data-y-start="2023" data-m-start="12" data-d-start="25" data-y-end="-1" data-m-end="-1" data-d-end="-1"></span>
-                        </p>
-                    </div>
-
-                    <div class="entry">
-                        <h3 class="font-space-grotesk">Freelancer • Bounty hunter</h3>
-                        <p>
-                            Jan 2022 - Dec 2023
-                            <span class="un-highlight" style="margin-left: 0.5rem; margin-right: 0.5rem;"> /// </span>
-                            <span class="time-period-label" data-y-start="2022" data-m-start="1" data-d-start="1" data-y-end="2023" data-m-end="12" data-d-end="1"></span>
-                        </p>
-                    </div>
-                </div>
-                <div class="edu">
-                    <h1 style="display: flex; align-items: center;">
-                        <span class="font-ndot45">Education</span>
-                        <span class="font-space-grotesk un-highlight" style="margin-left: 1rem; font-size: medium;">• Ongoing</span>
-                    </h2>
-
-                    <div class="entry">
-                        <h3 class="font-space-grotesk"><a href="https://www.gjovik.vgs.no/" target="_blank">Gjøvik Videregående Skole</a> • Informasjon Teknologi <span class="un-highlight">• IT</span></h3>
-                        <p>
-                            Aug 2024 - Present
-                            <span class="un-highlight" style="margin-left: 0.5rem; margin-right: 0.5rem;"> /// </span>
-                            <span class="time-period-label" data-y-start="2024" data-m-start="9" data-d-start="20" data-y-end="-1" data-m-end="-1" data-d-end="-1"></span>
-                        </p>
-                    </div>
+            <div class="left">
+                <img style="display: inline-block; width: 3.5rem;" class="filter-nearest" src="/images/pfp_native_res.png">
+                <div style="display: inline-block;">
+                    <h1 class="font-ndot45">IVAN RESHETNIKOV</h1>
+                    <p>Pronouced: <a href="https://ipa-reader.com/?text=%CB%88v%C9%91%CB%90.nja&voice=Joanna">/ˈvɑː.nja/</a>; Engine Developer & Gameplay Programmer</p>
                 </div>
             </div>
+            <div class="right">
+                <p style="color: #ff0000;">mode</p>
+                <div class="circle"></div>
+                <div class="drop-down" id="website-mode-drop-down"></div>
+            </div>
         </div>
-
-        <div>
-            <h2>Tooling</h2>
-            <ul>
-                <li>
-                    Godot <span class="un-highlight">/</span>
-                    C <span class="un-highlight">/</span>
-                    C++ <span class="un-highlight">/</span>
-                    Python
-                </li>
-                <li>
-                    Slack <span class="un-highlight">/</span>
-                    Discord
-                </li>
-                <li>
-                    G-suite <span class="un-highlight">/</span>
-                    Trello
-                </li>
-                <li>
-                    Krita <span class="un-highlight">/</span>
-                    Aseprite
-                </li>
-            </ul>
-        </div>
-
-        <div>
-            <h2>Communication</h2>
-            <ul>
-                <li>English</li>
-                <li>Ukrainian</li>
-                <li>Russian</li>
-                <li>Norwegian</li>
-                <li>Japanese</li>
-            </ul>
-        </div>
-
-        <div>
-            <h2>Contact</h2>
-            <ul>
-                <li><a href="mailto:contact@ivan-reshetnikov.dev">E-mail</a></li>
-                <li><a href="mailto:contact+priority@ivan-reshetnikov.dev">E-mail (Priority inbox)</a></li>
-                <li><a href="mailto:legal@ivan-reshetnikov.dev">E-mail (Legal inbox)</a></li>
-            </ul>
-        </div>
-    </main>
+    </header>
+    
+    <div id="page-content">
+        <!-- Populated -->
+    </div>
 
     <footer>
         <div class="container">
             <p class="font-pt-serif" xmlns:cc="http://creativecommons.org/ns#" xmlns:dct="http://purl.org/dc/terms/"><a property="dct:title" rel="cc:attributionURL" href="https://ivan-reshetnikov.dev">ivan-reshetnikov.dev</a> by <a rel="cc:attributionURL dct:creator" property="cc:attributionName" href="https://ivan-reshetnikov.dev">Ivan Reshetnikov</a> is licensed under <a href="https://creativecommons.org/licenses/by-nc-nd/4.0/?ref=chooser-v1" target="_blank" rel="license noopener noreferrer" style="display:inline-block;">CC BY-NC-ND 4.0</a></p>
         </div>
     </footer>
+
+    <!-- <script src="https://utteranc.es/client.js"
+        repo="ivan-resetnikov/ivan-reshetnikov.dev-db"
+        issue-number="3"
+        label="utterances-discussion"
+        theme="github-dark"
+        crossorigin="anonymous"
+        async>
+    </script> -->
 
     <script src="scripts/generic.js"></script>
 </body>
