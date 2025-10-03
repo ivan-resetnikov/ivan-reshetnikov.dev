@@ -1,4 +1,4 @@
-function populatePostList() {
+export function populatePostList() {
     const ALL_ARTICLES = [
         {
             "name": "Software triangle rasterisation",
@@ -31,9 +31,7 @@ function populatePostList() {
     postList.innerHTML = ``;
     ALL_ARTICLES.forEach(articleData => {
         postList.innerHTML += `<li><a href="/?page=article&id=${articleData.id}">${articleData.name}</a></li>`;
-        articleData;
     });
-
 }
 
 populatePostList();

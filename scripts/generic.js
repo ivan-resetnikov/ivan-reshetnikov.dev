@@ -93,12 +93,22 @@ function populateWebsiteModeDropdown(currentMode) {
 
 // Check if page script exists then add as child if exists
 async function loadPageScriptIfAvailible(appRoot, page) {
-    const url = `/scripts/${page.replace(".html", ".js")}`;
+    const scriptRequest = appRoot.querySelector("used-scripts");
+    if (scriptRequest) {
+        const csvAttr = scriptRequest.getAttribute("csv");
+        const scripts = csvAttr.split(",").map(s => s.trim());
 
-    const script = document.createElement("script");
-    script.src = url;
-    script.defer = true;
-    document.body.appendChild(script);
+        scripts.forEach(scriptName => {
+            const url = `/scripts/${scriptName}?t=${Date.now()}`;
+
+            const script = document.createElement("script");
+            script.src = url;
+            script.defer = true;
+            script.type = "module";
+
+            appRoot.appendChild(script);
+        });
+    }
 }
     
 
