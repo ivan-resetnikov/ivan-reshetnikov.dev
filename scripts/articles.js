@@ -17,7 +17,7 @@ export function populatePostList() {
             "id": "002"
         },
         {
-            "name": "Sub-Surface Scattering (SSR) Approximation",
+            "name": "Sub-Surface Scattering (SSS) Approximation",
             "id": "001"
         },
         {
