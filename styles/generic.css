@@ -40,42 +40,135 @@
 }
 
 /* Title font */
-h1 { font-family: 'space_mono'; margin-bottom: 1rem; }
+h1 { font-family: 'ndot45'; margin-bottom: 1rem; }
 h2 { font-family: 'pt_serif'; margin-bottom: 1rem; }
-h3 { font-family: 'space_mono'; margin-bottom: 1rem; }
-h4 { font-family: 'space_mono'; margin-bottom: 1rem; }
-h5 { font-family: 'space_mono'; margin-bottom: 1rem; }
-h6 { font-family: 'space_mono'; margin-bottom: 1rem; }
+h3 { margin-bottom: 1rem; }
+h4 { margin-bottom: 1rem; }
+h5 { margin-bottom: 1rem; }
+h6 { margin-bottom: 1rem; }
+
+h2::before {
+    content: "🭬";
+}
+
+h3::before {
+    content: "> ";
+}
 
 body {
     background-color: #14151f;
 }
 
-main div {
+header {
     background-color: #000;
+}
 
+header h1 {
+    font-size: 2rem;
+    margin: 0; 
+}
+
+header .container {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+
+    display: flex;
+    justify-content: space-between;
+}
+
+header .container .right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+body #page-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex-grow: 1;
     width: 50vw;
     margin-left: auto;
     margin-right: auto;
+}
+
+main .section {
+    background-color: #000;
+
+    width: 100%;
 
     margin-top: 1rem;
     margin-bottom: 1rem;
     padding: 1rem;
 }
 
+main .section-lit {
+    background-color: #000;
+    border: 1px solid #ff0000;
+
+    width: 100%;
+
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    padding: 1rem;    
+}
+
+main .corner {
+    position: absolute;
+    width: 1rem;
+}
+
+footer {
+    background-color: #000;
+}
+
+footer .container {
+    width: 50%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Style */
+a {
+    text-decoration: underline;
+}
+
+a:hover {
+    color: #ff0000;
+}
+
 ul {
     padding-left: 1rem;
 }
 
-li::marker {
+ul li::marker {
     content: "⠿ ";
+    color: #ff0000;
+}
+
+ol {
+    padding-left: 1rem;
+}
+
+ol li + li {
+    margin-top: 0.5rem;
+}
+
+ol li::marker {
     color: #ff0000;
 }
 
 .highlight {
     color: #ff0000;
     text-decoration: underline;
-    text-shadow: 0;
+}
+
+.highlight-weak {
+    text-decoration: underline;
 }
 
 .un-highlight {
@@ -94,19 +187,10 @@ li::marker {
     margin-right: 1rem;
 }
 
-a {
-    text-decoration: underline;
-}
-
-a:hover {
-    color: #ff0000;
-}
-
 /* Font overrides */
 .font-ndot45 {
     font-family: "ndot45", sans-serif;
     font-optical-sizing: auto;
-    text-shadow: 0;
     font-variation-settings: "ROND" 0;
 }
 
@@ -123,4 +207,51 @@ a:hover {
 .font-pt-serif {
     font-family: "pt_serif", sans-serif;
     font-optical-sizing: auto;
+}
+
+/* Drop down */
+.drop-down .content {
+    display: none;
+    position: absolute;
+
+    background-color: #000;
+}
+
+.drop-down:hover .content {
+    display: block;
+}
+
+.drop-down .content .mode-entry {
+    margin: 1rem;
+    
+    border-left: 1px solid #ff0000;
+    padding-left: 1rem;
+}
+
+.drop-down .content .mode-entry #current {
+    color: #ff0000;
+}
+
+/* Filtering */
+.filter-nearest {
+    /* IE */
+    -ms-interpolation-mode: nearest-neighbor;
+    /* Firefox */
+    image-rendering: crisp-edges;
+    /* Chromium + Safari */
+    image-rendering: pixelated;
+}
+
+/* Key value pairs list */
+.key-value-pair-list .key {
+    display: inline-block;
+}
+
+.key-value-pair-list .value {
+    display: inline-block;
+}
+
+.inline-icon {
+    display: inline-block;
+    width: 1rem;
 }

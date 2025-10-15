@@ -6,9 +6,9 @@ function replaceTimePeriodStrings() {
         const mStart = parseInt(label.dataset.mStart);
         const dStart = parseInt(label.dataset.dStart);
 
-        let yEnd = parseInt(label.dataset.yEnd);
-        let mEnd = parseInt(label.dataset.mEnd);
-        let dEnd = parseInt(label.dataset.dEnd);
+        var yEnd = parseInt(label.dataset.yEnd);
+        var mEnd = parseInt(label.dataset.mEnd);
+        var dEnd = parseInt(label.dataset.dEnd);
 
         // -1 indicates to use present day
         const usePresentDay = (yEnd === -1 || mEnd === -1 || dEnd === -1);
@@ -17,9 +17,9 @@ function replaceTimePeriodStrings() {
 
         const startDate = new Date(yStart, mStart - 1, dStart);
 
-        let years = endDate.getFullYear() - startDate.getFullYear();
-        let months = endDate.getMonth() - startDate.getMonth();
-        let days = endDate.getDate() - startDate.getDate();
+        var years = endDate.getFullYear() - startDate.getFullYear();
+        var months = endDate.getMonth() - startDate.getMonth();
+        var days = endDate.getDate() - startDate.getDate();
 
         if (days < 0) {
             months--;
@@ -32,9 +32,161 @@ function replaceTimePeriodStrings() {
             months += 12;
         }
 
+        // Format the label
         const pad = n => String(n).padStart(2, '0');
         label.innerHTML = `<span style="color: #ff0000">${pad(years)}Y</span> ${pad(months)}M ${pad(days)}D ${usePresentDay ? "+" : ""}`;
     });
 }
 
-replaceTimePeriodStrings();
+function populateWebsiteModeDropdown(currentMode) {
+    const ALL_WEBSITE_MODES = ["professional", "articles", "cooking"];
+    const WEBSITE_MODE_DESCRIPTIONS = {
+        "professional": "Professional information",
+        "articles": "Notes on technology",
+        "cooking": "My cooking book",
+    }
+    
+    // Populate the dropdown
+    const dropDownElement = document.getElementById("website-mode-drop-down");
+
+    modeListInnerHTML = ``;
+
+    ALL_WEBSITE_MODES.forEach(mode => {
+        // Populate the mode list
+        modeListInnerHTML += `
+            <div class="mode-entry">
+                <h1 ${mode == currentMode ? `id="current"` : ``}>${mode.toUpperCase()}</h1>
+                <p>${WEBSITE_MODE_DESCRIPTIONS[mode]}</p>
+            </div>
+        `
+    });
+
+    // Current mode text
+    const currentModeDesc = currentMode in WEBSITE_MODE_DESCRIPTIONS ? WEBSITE_MODE_DESCRIPTIONS[currentMode] : "";
+    dropDownElement.innerHTML = `
+        <h1>${currentMode.toUpperCase()}</h1>
+        <p>${currentModeDesc}</p>
+        <div class="content">
+            ${modeListInnerHTML}
+        </div>
+    `;
+
+    // Detect click on any mode entry
+    document.querySelector('.drop-down .content').addEventListener('click', function(event) {
+        const modeEntry = event.target.closest('.mode-entry');
+
+        if (modeEntry) {
+            const h1 = modeEntry.querySelector('h1');
+            const parsedModeName = h1.textContent.toLowerCase();
+
+            // Push new URL
+            const newUrl = new URL(window.location);
+            newUrl.search = "";
+            newUrl.searchParams.set("page", parsedModeName);
+            history.pushState({"page": parsedModeName}, "", newUrl);
+
+            // Load page
+            setPage(`${parsedModeName}.html`);
+        }
+    });
+}
+
+// Check if page script exists then add as child if exists
+async function loadPageScriptIfAvailible(appRoot, page) {
+    const scriptRequest = appRoot.querySelector("used-scripts");
+    if (scriptRequest) {
+        const csvAttr = scriptRequest.getAttribute("csv");
+        const scripts = csvAttr.split(",").map(s => s.trim());
+
+        scripts.forEach(scriptName => {
+            const url = `/scripts/${scriptName}?t=${Date.now()}`;
+
+            const script = document.createElement("script");
+            script.src = url;
+            script.defer = true;
+            script.type = "module";
+
+            appRoot.appendChild(script);
+        });
+    }
+}
+    
+
+// Navigation handler, because the website operates on loading & unloading the content in <body> instead of reloading the entire page (Which flashes the user with white)
+async function setPage(page) {
+    const url = `/pages/${page}`;
+    const response = await fetch(url);
+    if (!response.ok) {
+        log.error("Could not find requested page");
+        return;
+    }
+    const htmlText = await response.text();
+
+    const parser = new DOMParser();
+    const newDoc = parser.parseFromString(htmlText, 'text/html');
+
+    const newContent = newDoc.querySelector('#page-content');
+    const appRoot = document.getElementById('page-content');
+
+    if (newContent && appRoot) {
+        appRoot.innerHTML = newContent.innerHTML;
+        loadPageScriptIfAvailible(appRoot, page);
+    } else {
+        console.error("Failed to find page-content in fetched page");
+    }
+
+    onPageLoad();
+}
+
+function onPageLoad() {
+    const urlParams = new URLSearchParams(window.location.search);
+    var page = urlParams.get("page");
+    if (page == null) { page = "professional"; }
+
+    populateWebsiteModeDropdown(page);
+    replaceTimePeriodStrings();
+}
+
+function setPageFromURL() {
+    const urlParams = new URLSearchParams(window.location.search);
+    var page = urlParams.get("page");
+    if (page == null) { page = "professional"; }
+
+    switch (page) {
+        case "cooking":
+            var recipe = urlParams.get("recipe");
+
+            if (recipe == null) {
+                setPage("cooking.html");
+            } else {
+                setPage(`cooking_${recipe}.html`);
+            }
+
+            break;
+    
+        case "article":
+            var article_id = urlParams.get("id");
+
+            if (article_id == null) {
+                setPage("articles.html");
+            } else {
+                setPage(`article_${article_id}.html`);
+            }
+
+            break;
+    
+        default:
+            setPage(`${page}.html`);
+            break;
+    }
+
+}
+
+// First website load, set the page
+setPageFromURL();
+
+// Bind URL change to page changing request
+function historyChanged(popstateEvent) {
+    setPageFromURL();
+}
+window.addEventListener("popstate", historyChanged);
