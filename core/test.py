@@ -1,16 +1,18 @@
 import logging
 import urllib.parse
 
-from .router import Router
+from collections.abc import Callable
+
+from core import *
 
 
-def test(self, p_name: str) -> Callable:
+def testthing(p_name: str) -> Callable:
 
     def definition_wrapper(p_decorated_function: Callable) -> Callable:
-
-        def call_wrapper(*p_args, **p_kwargs) -> str:
-            print(f"Running test \"{p_name}\"")
-            return p_decorated_function(*p_args, **p_kwargs)
+        def call_wrapper(*p_args, **p_kwargs) -> None:
+            logging.info(f"Running test \"{p_name}\"")
+            p_decorated_function(*p_args, **p_kwargs)
+            logging.info(f"Test passed")
 
         return call_wrapper
 
@@ -19,8 +21,8 @@ def test(self, p_name: str) -> Callable:
     return definition_wrapper
 
 
-@test("Penetration-testing the router")
-def penetration_test_router(p_router: Router) -> None:
+@testthing("Penetration-testing the router")
+def penetrate_router(p_router: Router) -> None:
     """
     Run a path-traversal test against routes that try to navigate up the file system tree.
 
@@ -59,15 +61,21 @@ def penetration_test_router(p_router: Router) -> None:
                 urllib.parse.quote(test_path),
             }
 
-            for candidate in candidates:
-                matched = p_router.match(route.method, candidate)
+            for candidate_path in candidates:
+                malitious_request = HTTPRequest()
+                malitious_request.method = route.method
+                malitious_request.url = candidate_path
+        
+                malitious_request.path = candidate_path
+        
+                malitious_request.body = b""
 
-                if matched is not None:
+                response = p_router.HTTP_request_handler(malitious_request)
+
+                if response == 200:
                     assert False, (
-                        f"Potential path traversal vulnerability:\n"
+                        f"Potential path traversal vulnerability found!:\n"
                         f"  route:   {route.method} {route_path}\n"
-                        f"  payload: {candidate!r}\n"
+                        f"  payload: {candidate_path!r}\n"
                         f"  matched: {matched!r}"
                     )
-
-        print("  ✓ passed")

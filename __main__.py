@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import mimetypes
 import os
@@ -58,8 +59,27 @@ def serve_forever() -> None:
     router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "domain.cert.pem", "private.key.pem")
 
 
-def test() -> None:
-    penetration_test_router(router)
+async def test_all() -> None:
+    http_server = HTTPServer()
+
+    server_task = asyncio.create_task(
+        http_server.serve_forever(
+            router.HTTP_request_handler,
+            "127.0.0.1",
+            8000,
+        )
+    )
+
+    try:
+        test.penetrate_router(router)
+    finally:
+        server_task.cancel()
+
+        try:
+            await server_task
+        except asyncio.CancelledError:
+            pass
+
 
 
 if __name__ == "__main__":
@@ -76,10 +96,10 @@ if __name__ == "__main__":
 
         match token:
             case "-t":
-                test()
+                asyncio.run(test_all())
                 sys.exit(0)
             case _:
-                logging.error("Unhandled argument")
+                logging.error(f"Unhandled argument \"{token}\"!")
 
         serve_forever()
         sys.exit(0)
