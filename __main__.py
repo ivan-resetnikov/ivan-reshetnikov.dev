@@ -1,7 +1,6 @@
 import asyncio
 import logging
 import mimetypes
-import os
 import sys
 
 from core import *
@@ -9,7 +8,7 @@ from components.image import Image
 from components.thought import Thought
 
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.DEBUG)
 
 router = Router()
 html = HTMLTemplateRenderer()
@@ -29,7 +28,7 @@ async def _(p_request: HTTPRequest, name: str) -> HTTPResponse:
     )
 
 
-@router.get("/public/*")
+@router.get("/public/...")
 async def _(p_request: HTTPRequest) -> HTTPResponse:
     filesystem_path: str|None = join_paths_safe("./public", p_request.path.removeprefix("/public"))
     if filesystem_path is None:
@@ -54,9 +53,9 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
     return HTTPResponse.ok_file("./public/favicon.ico")
 
 
-def serve_forever() -> None:
+def main() -> None:
     html.register_components_from_dir("./components")
-    router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "domain.cert.pem", "private.key.pem")
+    router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")
 
 
 async def test_all() -> None:
@@ -89,17 +88,15 @@ if __name__ == "__main__":
         else:
             return None
 
-    while True:
-        token: str|None = pop_arg()
-        if token is None:
-            break
+    pop_arg() # NOTE(vanya): Pop the first argument, which is the script path.
 
+    while (token := pop_arg()) is not None:
         match token:
             case "-t":
                 asyncio.run(test_all())
                 sys.exit(0)
             case _:
-                logging.error(f"Unhandled argument \"{token}\"!")
+                logging.warning(f"Unhandled argument \"{token}\"!")
 
-        serve_forever()
-        sys.exit(0)
+    main()
+    sys.exit(0)

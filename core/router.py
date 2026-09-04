@@ -76,25 +76,31 @@ class Router:
 
 
     async def HTTP_request_handler(self, p_request: HTTPRequest) -> HTTPResponse:
+        """ Callback for the HTTPServer to handle incoming requests. """
+
+        # NOTE(vanya): Match a route within the requested method
+
+        logging.debug(f"Matching routes for request: {p_request.request_line}")
+
         for route in self.method_routes.get(p_request.method, []):
             route_parts = route.path.strip("/").split("/")
             request_parts = p_request.path.strip("/").split("/")
 
             if len(request_parts) < len(route_parts):
+                # NOTE(vanya): Already not a match
                 continue
 
             route_args: dict[str, str] = {}
             matched: bool = True
 
-            for i, route_part in enumerate(route_parts):
-                request_part = request_parts[i]
-
-                if route_part == "*":
-                    # Wildcard matches everything remaining
+            for route_part, request_part in zip(route_parts, request_parts):
+                if route_part == "...":
+                    # NOTE(vanya): Catchall route - guaranteed match.
                     break
 
                 if route_part.startswith("<") and route_part.endswith(">"):
-                    argument_name = route_part[1:-1]
+                    # NOTE(vanya): Parametrised route - match this part, and store the parameter value to later pass into the route's callback.
+                    argument_name: str = route_part[1:-1]
                     route_args[argument_name] = request_part
                     continue
 
@@ -104,11 +110,12 @@ class Router:
 
             if not matched:
                 logging.debug(f"Route {route.path} rejected.")
-                continue
+            else:
+                logging.debug(f"Route {route.path} matched with requested path {p_request.path}")
 
-            logging.debug(f"Route {route.path} matched with requested path {p_request.path}")
+                return await route.callback(p_request, **route_args)
 
-            return await route.callback(p_request, **route_args)
+        logging.error(f"No matching route found - serving error 404.")
 
         return HTTPResponse.not_found(
             "404".encode("utf-8"),

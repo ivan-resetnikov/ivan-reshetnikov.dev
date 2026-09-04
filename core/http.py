@@ -45,6 +45,11 @@ class HTTPRequest:
         self.preffered_languages: list[str] = []
 
 
+    @property
+    def request_line(self) -> str:
+        return f"{self.method} {self.url} {self.http_version}"
+
+
 
 
 class HTTPResponse:
@@ -140,6 +145,8 @@ class HTTPServer:
             p_tls_key_file: str|None=None,
     ) -> Error:
         self.request_handler = p_HTTP_request_handler
+
+        logging.info(f"Starting HTTP server at `{p_ip}:{p_port}`")
         
         try:
             ssl_context: ssl.SSLContext|None = None
@@ -167,21 +174,13 @@ class HTTPServer:
                 await server.serve_forever()
 
         except OSError as error:
-            match error.errno:
-                case errno.EADDRINUSE:
-                    logging.error(f"OSError .errno=EADDRINUSE ({error.errno}) - Port already in use.")
-                case errno.EACCES:
-                    logging.error(f"OSError .errno=EACCES ({error.errno}) - Permission denied by the OS.")
-                case errno.EINVAL:
-                    logging.error(f"OSError .errno=EINVAL ({error.errno}) - Invalid address.")
-                case errno.EAFNOSUPPORT:
-                    logging.error(f"OSError .errno=EAFNOSUPPORT ({error.errno}) - Address family not supported.")
-                case errno.EADDRNOTAVAIL:
-                    logging.error(f"OSError .errno=EADDRNOTAVAIL ({error.errno}) - Trying to bind to an IP not assigned to your machine.")
-                case errno.EOPNOTSUPP:
-                    logging.error(f"OSError .errno=EOPNOTSUPP ({error.errno}) - Binding not supported by the OS.")
-                case _:
-                    logging.error(f"OSError .errno=UNKNOWN ({error.errno}) - Unhandled error had occured!")
+            logging.exception(
+                    "OSError: errno=%r (%s), - %s",
+                    error.errno,
+                    errno.errorcode.get(error.errno) if error.errno is not None else "Unknown",
+                    error.strerror
+            )
+
             return "SERVER_START_FAIL"
         
         except Exception as e:
@@ -258,7 +257,7 @@ class HTTPServer:
             logging.error("CALL STACK BEGIN".center(50, "-"))
             traceback.print_exc()
             logging.error("CALL STACK END".center(50, "-"))
-            logging.info(f"Responding with a server error.")
+            logging.info(f"Serving error 500.")
 
             writer.write(HTTPResponse().server_error(b"Server error").to_bytes())
             await writer.drain()
