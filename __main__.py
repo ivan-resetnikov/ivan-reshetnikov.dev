@@ -8,6 +8,7 @@ from components.image import Image
 from components.thought import Thought
 
 
+
 logging.basicConfig(level=logging.DEBUG)
 
 router = Router()
@@ -23,14 +24,14 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
 async def _(p_request: HTTPRequest, name: str) -> HTTPResponse:
     return html.render_file_response(
             "./pages/thought.html",
-            title=f"Vanya's thought #{name}",
-            content=Thought.from_html(f"./thoughts/{name}.html").render_html(),
+            p_title=f"Vanya's thought #{name}",
+            p_content=Thought.from_html(f"./thoughts/{name}.html").render_html(),
     )
 
 
 @router.get("/public/...")
 async def _(p_request: HTTPRequest) -> HTTPResponse:
-    filesystem_path: str|None = join_paths_safe("./public", p_request.path.removeprefix("/public"))
+    filesystem_path: str|None = crypto.join_paths_safe("./public", p_request.path.removeprefix("/public"))
     if filesystem_path is None:
         return HTTPResponse.reject(b"Path traversing fuck! No!")
 

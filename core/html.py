@@ -5,6 +5,7 @@ import re
 import shlex
 
 from collections.abc import Callable
+from typing import Any
 
 from .http import HTTPResponse
 
@@ -28,6 +29,7 @@ class HTMLTemplateRenderer:
 
 
     def component(self, p_name: str) -> Callable:
+        """ A decorator to register a component. """
 
         def definition_wrapper(p_decorated_function: Callable) -> Callable:
 
@@ -46,48 +48,23 @@ class HTMLTemplateRenderer:
     def render(self, p_source: str, **p_kwargs: dict) -> str:
         rendered_source: str = p_source
 
-        # NOTE(vanya): Replace all VARIABLE syntax with registered components until none are left
+        # NOTE(vanya): Replace all component syntax with registered components and kwargs until none are left
         while True:
             # NOTE(vanya): Match syntax
             regex_match = re.search(r"<!--\s*\$.*?-->", rendered_source, re.S)
-            
+
             if regex_match == None:
                 # NOTE(vanya): No syntax left to replace
                 break
             
-            replace_str: str = ""
 
-            # NOTE(vanya): Parse syntax innards
-            variable_syntax: str = regex_match.group(0)
-            variable_inner_syntax: str = (
-                variable_syntax
-                .strip()
-                .removeprefix("<!--")
-                .removesuffix("-->")
-                .strip()
-            )
-
-            # NOTE(vanya): Parse variable name
-            requested_variable_name: str = variable_inner_syntax.removeprefix("$")
-
-            if requested_variable_name in p_kwargs.keys():
-                # NOTE(vanya): Replace the syntax source with the found value
-                rendered_source = rendered_source[:regex_match.start()] + str(p_kwargs[requested_variable_name]) + rendered_source[regex_match.end():]
-            else:
-                rendered_source = rendered_source[:regex_match.start()] + rendered_source[regex_match.end():]
-                logging.warning(f"The found variable syntax `{requested_variable_name}` was not provided to the rendering function! (Broken Python)")
-
-        # NOTE(vanya): Replace all COMPONENT syntax with registered components until none are left
-        while True:
-            # NOTE(vanya): Match syntax
-            regex_match = re.search(r"<!--\s*@.*?-->", rendered_source, re.S)
-            
-            if regex_match == None:
-                # NOTE(vanya): No syntax left to replace
-                break
-            
-            replace_str: str = ""
-
+            def replace_match(p_text: str) -> None:
+                nonlocal rendered_source
+                rendered_source = (
+                    rendered_source[:regex_match.start()]
+                    + p_text
+                    + rendered_source[regex_match.end():]
+                )
 
             # NOTE(vanya): Parse syntax innards
 
@@ -106,18 +83,16 @@ class HTMLTemplateRenderer:
             parts: list[str] = shlex.split(component_inner_syntax)
 
             if not parts:
-                logging.warning(
-                    f"Component syntax without a component name! `{component_syntax}`"
-                )
+                logging.warning(f"Empty component syntax! {component_syntax}")
 
                 # NOTE(vanya): Remove malformed syntax so it isn't matched forever.
-                rendered_source = (
-                    rendered_source[:regex_match.start()]
-                    + rendered_source[regex_match.end():]
-                )
+                replace_match("")
                 continue
 
-            requested_component_name: str = parts.pop(0).removeprefix("@")
+
+            # NOTE(vanya): Parse component name
+
+            requested_component_name: str = parts.pop(0).removeprefix("$")
 
             args: list = []
             kwargs: dict = {}
@@ -133,40 +108,51 @@ class HTMLTemplateRenderer:
                 logging.warning(f"Component syntax without a component name! `{component_syntax}` `{requested_component_name}`")
 
             # NOTE(vanya): Search for a component to render the replacement
-            found_requested_component: bool = False
-            for component in self.components:
-                if component.name == requested_component_name:
-                    # NOTE(vanya): Call component rendering function with argments and renderpass parameters
-                    found_requested_component = True
 
-                    if component.callback:
-                        replace_str = component.callback(*args, **kwargs)
-                    else:
-                        logging.warning(f"The found component `{requested_component_name}` does not have a assigned callback. (Malformed component!)")
-
-                    break
+            component_found: bool = False
             
-            if not found_requested_component:
-                # if requested_component_name in p_paste_keys:
-                #     replace_str = str(p_paste_keys[requested_component_name])
-                # else:
-                logging.error(f"Could not find a requested component `{requested_component_name}`.")
+            for component in self.components:
+                if component.name != requested_component_name:
+                    continue
 
-            # NOTE(vanya): Replace the HTML source
-            rendered_source = rendered_source[:regex_match.start()] + replace_str + rendered_source[regex_match.end():]
+                component_found = True
+
+                if component.callback:
+                    # NOTE(vanya): Call the component rendering function with the passed args and kwargs from HTML
+                    replace_match(component.callback(*args, **kwargs))
+                else:
+                    logging.warning(f"The found component does not have an assigned callback! \"{requested_component_name}\"")
+
+                break
+
+            if component_found:
+                continue
+
+
+            # NOTE(vanya): If the component was not found, check if it is in the kwargs and replace it with that instead.
+            if requested_component_name in p_kwargs:
+                replace_match(str(p_kwargs[requested_component_name]))
+                continue
+
+            
+            logging.error(f"Could not find a component or a rendering parameter! - {requested_component_name}")
+
+            # NOTE(vanya): Remove the failed syntax so it isn't matched forever.
+            replace_match("")
 
         return rendered_source
 
 
-    def render_file(self, p_path: str, **p_kwargs: dict) -> str:
+    def render_file(self, p_path: str, **p_kwargs: Any) -> str:
         with open(p_path, "r", encoding="utf-8") as f:
             return self.render(f.read(), **p_kwargs)
 
 
-    def render_file_response(self, p_path: str, **p_kwargs: dict) -> HTTPResponse:
+    def render_file_response(self, p_path: str, **p_kwargs: Any) -> HTTPResponse:
         if os.path.exists(p_path):
             return HTTPResponse.ok(self.render_file(p_path, **p_kwargs).encode("utf-8"), "text/html; charset=utf-8")
         else:
+            logging.error(f"Cannot render an html file - does not exist @ {p_path}")
             return HTTPResponse.not_found(b"404", "text/html; charset=utf-8")
 
 
@@ -177,11 +163,11 @@ class HTMLTemplateRenderer:
 
         self.components.append(new_component)
 
-        logging.debug(f"Registered component `{p_name}`")
+        logging.debug(f"Registered component - {p_name}")
 
 
     def register_components_from_dir(self, p_path: str) -> None:
-        logging.debug(f"Scanning directory `{p_path}` to register components.")
+        logging.debug(f"Scanning directory to register components @ {p_path}")
 
         assert os.path.exists(p_path), "The component directory must exist!"
 
@@ -230,7 +216,7 @@ class HTMLTemplateRenderer:
                     def simple_html_render_callback(
                             *args: str,
                             p_file_path: str=file_path,
-                            **kwargs: str,
+                            **kwargs: Any,
                     ) -> str:
                         return self.render_file(p_file_path)
 
