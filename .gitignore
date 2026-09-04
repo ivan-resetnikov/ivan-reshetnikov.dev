@@ -1,0 +1,9 @@
+# Certificates
+*.cert.*
+*.crt.*
+*.pem.*
+*.key.*
+
+# Python
+.venv/
+__pycache__/

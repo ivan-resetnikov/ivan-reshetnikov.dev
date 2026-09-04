@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><!-- $title --></title>
+
+    <link rel="stylesheet" href="/public/styles/main.css">
+</head>
+<body>
+    <main>
+        <!-- @header.html -->
+
+        <div class="window">
+            <!-- $content -->
+        </div>
+
+        <!-- @footer.html -->
+    </main>
+
+    <!-- @hide_very_lazy_img_if_no_js.html -->
+    
+    <script>
+function add_and_run_script(p_path) {
+    const s = document.createElement("script");
+    s.src = p_path;
+    s.defer = true;
+    document.body.appendChild(s);
+}
+
+// NOTE(vanya): Wait until the page is fully loaded then load optional scripts
+window.addEventListener('load', () => {
+    add_and_run_script("/public/javascript/localize_date.js")
+    add_and_run_script("/public/javascript/syntax_highlighting.js")
+    add_and_run_script("/public/javascript/very_lazy_img_fetch.js")
+});
+    </script>
+</body>
+</html>

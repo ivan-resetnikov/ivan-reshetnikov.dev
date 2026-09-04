@@ -1,0 +1,34 @@
+.script {
+    padding: 2rem;
+    margin: 2rem auto;
+
+    background-image: url("/public/pictures/articles/0/paper_texture.png");
+    rotate: 2deg;
+
+    box-shadow: 1px 1px 4px 0 black;
+
+    aspect-ratio: 1 / 1.414; /* A4 paper */
+}
+
+/* .script::before {
+    content: "";
+    
+    display: block;
+    position: absolute;
+
+    left: 0;
+    top: 0;
+
+    width: calc(16px * 2);
+    height: calc(16px * 2);
+
+    background-image: url("/public/pictures/articles/0/paper_corner.png");
+    image-rendering: pixelated;
+    background-size: contain;
+    background-position: center;
+} */
+
+.script pre {
+    font-family: 'Courier New', Courier, monospace;
+    font-weight: bold;
+}

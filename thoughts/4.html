@@ -1,0 +1,42 @@
+<h3>Awaiting multiple signals in Godot</h3>
+
+<figure>
+    <video loop controls poster>
+        <source src="/public/videos/awaiting_multiple_signals_in_godot_demo.webm" type="video/webm">
+    </video>
+    <figcaption>Video TBD, hehe</figcaption>
+</figure>
+
+<figure class="code-window">
+    <figcaption>code_for_the_video_above.gd</figcaption>
+    <pre><code>
+await SignalGroup.await_all([
+    player.say("Oh look here!"),
+    player.walk_to(table_marker.global_position)
+])
+player.say("Nice table")
+    </code></pre>
+</figure>
+
+<p>
+    I expanded upon the article
+    <a href="https://shaggydev.com/2025/06/12/godot-awaiting-signals/" target="_blank">Awaiting multiple signals in Godot 4</a> by Jason McCollum.
+</p>
+<p>
+    I made use of variadic arguments added in <a href="https://github.com/godotengine/godot-proposals/issues/1034" target="_blank">#1034</a>,
+    to prevent a crash when awaiting for a signal that passes a parameter.
+    And added factories like <code>all</code> or <code>any</code>.
+</p>
+
+<figure>
+    <blockquote>
+        ...but those ideas are left as an exercise for the reader.
+    </blockquote>
+    <figcaption>
+        <cite>
+            - The kind sir at the end of his article
+        </cite>
+    </figcaption>
+</figure>
+
+<a href="/article/0" class="button">Code for SignalGroup & open full article</a>
