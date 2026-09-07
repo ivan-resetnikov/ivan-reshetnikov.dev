@@ -1,11 +1,8 @@
-import asyncio
 import logging
 import mimetypes
-import sys
 
 from core import *
-from components.image import Image
-from components.thought import Thought
+from components import *
 
 
 
@@ -54,50 +51,7 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
     return HTTPResponse.ok_file("./public/favicon.ico")
 
 
-def main() -> None:
-    html.register_components_from_dir("./components")
-    router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")
-
-
-async def test_all() -> None:
-    http_server = HTTPServer()
-
-    server_task = asyncio.create_task(
-        http_server.serve_forever(
-            router.HTTP_request_handler,
-            "127.0.0.1",
-            8000,
-        )
-    )
-
-    try:
-        test.penetrate_router(router)
-    finally:
-        server_task.cancel()
-
-        try:
-            await server_task
-        except asyncio.CancelledError:
-            pass
-
-
 
 if __name__ == "__main__":
-    def pop_arg() -> str|None:
-        if sys.argv:
-            return sys.argv.pop()
-        else:
-            return None
-
-    pop_arg() # NOTE(vanya): Pop the first argument, which is the script path.
-
-    while (token := pop_arg()) is not None:
-        match token:
-            case "-t":
-                asyncio.run(test_all())
-                sys.exit(0)
-            case _:
-                logging.warning(f"Unhandled argument \"{token}\"!")
-
-    main()
-    sys.exit(0)
+    html.register_components_from_dir("./components")
+    router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")
