@@ -53,6 +53,5 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
 
 
 if __name__ == "__main__":
-    pass
-    # html.register_components_from_dir("./components")
-    # router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")
+    html.register_components_from_dir("./components")
+    router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")
