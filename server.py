@@ -57,7 +57,7 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
 
     signature: str|None = p_request.headers_dict.get("X-Hub-Signature-256")
     expected: str = "sha256=" + hmac.new(
-        bytes(os.environ["GITHUB_WEBHOOK_SECRET"]),
+        os.environ["GITHUB_WEBHOOK_SECRET"].encode("utf-8"),
         p_request.body,
         hashlib.sha256,
     ).hexdigest()
