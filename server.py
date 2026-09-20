@@ -1,3 +1,4 @@
+import json
 import logging
 import mimetypes
 
@@ -44,6 +45,17 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
         
     else:
         return HTTPResponse.ok_file(filesystem_path)
+
+
+@router.post("/github-webhook")
+async def _(p_request: HTTPRequest) -> HTTPResponse:
+    payload: dict = json.loads(p_request.body)
+
+    # NOTE(vanya): Mark current version as invalid to the supervisor by creating a file .out_of_date
+    with open(".out_of_date", "w") as f:
+        f.write("")
+
+    return HTTPResponse.ok()
 
 
 @router.get("/favicon.ico")

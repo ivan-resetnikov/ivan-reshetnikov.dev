@@ -49,6 +49,20 @@ class Router:
         return definition_wrapper
 
 
+    def post(self, p_route: str) -> Callable:
+    
+        def definition_wrapper(p_decorated_function: HTTPRequestHandlerType) -> Callable:
+
+            async def call_wrapper(p_request_info: HTTPRequest, **p_kwargs: dict) -> HTTPResponse:
+                return await p_decorated_function(p_request_info, **p_kwargs)
+
+            self.register_route("POST", p_route, call_wrapper)
+
+            return call_wrapper
+
+        return definition_wrapper
+
+
     def register_route(self, p_method: str, p_path: str, p_handler: HTTPRequestHandlerType) -> None:
         new_route = Route(p_method, p_path, p_handler)
 
