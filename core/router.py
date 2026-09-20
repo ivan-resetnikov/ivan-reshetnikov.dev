@@ -27,12 +27,11 @@ class Router:
     """
 
     def __init__(self) -> None:
-        # WARNING(vanya): The two varaibles below must be in sync
+        # WARNING(vanya): The two variables below must be in sync
         self.routes: list[Route] = []
         self.method_routes: dict[str, list[Route]] = {}
 
-        self.public_prefix: str = ""
-        self.public_handler: Callable|None = None
+        self.middleware_route: Callable|None = None
 
 
     def get(self, p_route: str) -> Callable:
@@ -59,6 +58,16 @@ class Router:
             self.register_route("POST", p_route, call_wrapper)
 
             return call_wrapper
+
+        return definition_wrapper
+
+
+    def middleware(self) -> Callable:
+        def definition_wrapper(p_decorated_function: HTTPRequestHandlerType) -> Callable:
+
+            self.middleware_route = p_decorated_function
+
+            return p_decorated_function
 
         return definition_wrapper
 
@@ -91,6 +100,12 @@ class Router:
 
     async def HTTP_request_handler(self, p_request: HTTPRequest) -> HTTPResponse:
         """ Callback for the HTTPServer to handle incoming requests. """
+
+        # NOTE(vanya): Pass the request through the middleware route for security
+
+        if self.middleware_route:
+            if not self.middleware_route(p_request):
+                return HTTPResponse.reject()
 
         # NOTE(vanya): Match a route within the requested method
 

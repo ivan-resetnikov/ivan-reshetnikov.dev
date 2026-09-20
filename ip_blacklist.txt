@@ -1,0 +1,8 @@
+213.209.159.175
+# On: 2026-09-20T18:54:22Z
+# Offence: Some sniffing of security-related files such as: .env .git .git/config backup.sql database.sql wp-admin/ phpmyadmin/ server-status storage/logs/laravel.log
+
+45.148.10.120
+# On: 2026-09-20T19:05:22Z
+# Offence: Sniffing
+

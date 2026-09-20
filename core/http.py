@@ -20,6 +20,8 @@ Error = str
 
 class HTTPRequest:
     def __init__(self) -> None:
+        self.ip: str = ""
+
         self.method: str = ""
         self.url: str = ""
         self.http_version: str = ""
@@ -198,6 +200,8 @@ class HTTPServer:
 
             # NOTE(vanya): HTTPRequest is a bundle of all the data of the HTTP request.
             request = HTTPRequest()
+
+            request.ip = writer.get_extra_info("peername")[0]
             
             # NOTE(vanya): Recieve request line
             request_line_bytes: bytes = await reader.readline()

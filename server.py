@@ -1,10 +1,16 @@
 import json
 import logging
 import mimetypes
+import hashlib
+import hmac
 
 from core import *
 from components import *
 
+
+
+
+GITHUB_WEBHOOK_SECRET: str = ""
 
 
 logging.basicConfig(level=logging.DEBUG)
@@ -51,6 +57,17 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
 async def _(p_request: HTTPRequest) -> HTTPResponse:
     payload: dict = json.loads(p_request.body)
 
+    signature: str|None = p_request.headers_dict.get("X-Hub-Signature-256")
+    expected: str = "sha256=" + hmac.new(
+        GITHUB_WEBHOOK_SECRET,
+        p_request.body,
+        hashlib.sha256,
+    ).hexdigest()
+
+    if not signature or not hmac.compare_digest(signature, expected):
+        ip_blacklist.add(p_request.ip)
+        return HTTPResponse.reject(b"Fuck off you impersonating fuck!")
+
     # NOTE(vanya): Mark current version as invalid to the supervisor by creating a file .out_of_date
     with open(".out_of_date", "w") as f:
         f.write("")
@@ -63,7 +80,16 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
     return HTTPResponse.ok_file("./public/favicon.ico")
 
 
+@router.middleware()
+def _(p_request: HTTPRequest) -> bool:
+    if ip_blacklist.contains(p_request.ip):
+        return False
+
+    return True
+
+
 
 if __name__ == "__main__":
+    ip_blacklist.load("./ip_blacklist.txt")
     html.register_components_from_dir("./components")
     router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")

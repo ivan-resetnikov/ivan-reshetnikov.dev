@@ -4,6 +4,9 @@
 *.pem.*
 *.key.*
 
+# Environment varaibles
+.env
+
 # Python
 .venv/
 __pycache__/

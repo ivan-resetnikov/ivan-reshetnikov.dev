@@ -6,3 +6,4 @@ from .html import HTMLTemplateRenderer
 # NOTE(vanya): Less frequently used modules
 from . import crypto
 from . import acme
+from . import ip_blacklist

@@ -10,5 +10,3 @@ def join_paths_safe(p_base_dir: str, p_path: str) -> str | None:
         return None
 
     return resolved
-
-
