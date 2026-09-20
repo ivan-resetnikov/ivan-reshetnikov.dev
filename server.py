@@ -4,6 +4,7 @@ import mimetypes
 import hashlib
 import hmac
 import os
+from time import monotonic
 
 from core import *
 from components import *
@@ -14,6 +15,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 router = Router()
 html = HTMLTemplateRenderer()
+
+requests_last_minute: dict[str, list[float]] = {}
 
 
 
@@ -82,6 +85,21 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
 def _(p_request: HTTPRequest) -> bool:
     if ip_blacklist.contains(p_request.ip):
         return False
+
+    now: float = monotonic()
+    requests: list[float] = requests_last_minute[p_request.ip]
+
+    # Remove requests older than one minute.
+    requests[:] = [
+        timestamp
+        for timestamp in requests
+        if now - timestamp < 60.0
+    ]
+
+    if len(requests) >= 60:
+        return False
+
+    requests.append(now)
 
     return True
 
