@@ -1,5 +1,4 @@
 import json
-import logging
 import mimetypes
 import hashlib
 import hmac
@@ -16,8 +15,6 @@ from moe.server import crypto
 from components import *
 
 
-
-logging.basicConfig(level=logging.DEBUG)
 
 router = Router()
 html = HTMLTemplateRenderer()

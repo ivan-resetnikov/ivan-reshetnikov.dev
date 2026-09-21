@@ -1,5 +1,4 @@
 import importlib
-import logging
 import os
 import re
 import shlex
@@ -8,6 +7,7 @@ from collections.abc import Callable
 from typing import Any
 
 from .http import HTTPResponse
+from ..scripting_commons.log import *
 
 
 ComponentCallbackType = Callable[[list[str], dict[str, str]], str]
@@ -39,8 +39,6 @@ class HTMLTemplateRenderer:
             self.register_component(p_name, call_wrapper)
 
             return call_wrapper
-
-        logging.info(f"Registered component `{p_name}`")
 
         return definition_wrapper
 
@@ -83,7 +81,7 @@ class HTMLTemplateRenderer:
             parts: list[str] = shlex.split(component_inner_syntax)
 
             if not parts:
-                logging.warning(f"Empty component syntax! {component_syntax}")
+                log(f"Empty component syntax! {component_syntax}")
 
                 # NOTE(vanya): Remove malformed syntax so it isn't matched forever.
                 replace_match("")
@@ -105,7 +103,7 @@ class HTMLTemplateRenderer:
                     args.append(part)
 
             if not requested_component_name:
-                logging.warning(f"Component syntax without a component name! `{component_syntax}` `{requested_component_name}`")
+                log(f"Component syntax without a component name! `{component_syntax}` `{requested_component_name}`")
 
             # NOTE(vanya): Search for a component to render the replacement
 
@@ -121,7 +119,7 @@ class HTMLTemplateRenderer:
                     # NOTE(vanya): Call the component rendering function with the passed args and kwargs from HTML
                     replace_match(component.callback(*args, **kwargs))
                 else:
-                    logging.warning(f"The found component does not have an assigned callback! \"{requested_component_name}\"")
+                    log(f"The found component does not have an assigned callback! \"{requested_component_name}\"")
 
                 break
 
@@ -135,7 +133,7 @@ class HTMLTemplateRenderer:
                 continue
 
             
-            logging.error(f"Could not find a component or a rendering parameter! - {requested_component_name}")
+            log(f"Could not find a component or a rendering parameter! - {requested_component_name}")
 
             # NOTE(vanya): Remove the failed syntax so it isn't matched forever.
             replace_match("")
@@ -152,7 +150,7 @@ class HTMLTemplateRenderer:
         if os.path.exists(p_path):
             return HTTPResponse.ok(self.render_file(p_path, **p_kwargs).encode("utf-8"), "text/html; charset=utf-8")
         else:
-            logging.error(f"Cannot render an html file - does not exist @ {p_path}")
+            log(f"Cannot render an html file - does not exist @ {p_path}")
             return HTTPResponse.not_found(b"404", "text/html; charset=utf-8")
 
 
@@ -163,11 +161,12 @@ class HTMLTemplateRenderer:
 
         self.components.append(new_component)
 
-        logging.debug(f"Registered component - {p_name}")
+        log(f"Registered component - {p_name}")
 
 
     def register_components_from_dir(self, p_path: str) -> None:
-        logging.debug(f"Scanning directory to register components @ {p_path}")
+        log(f"Scanning directory to register components @ {p_path}")
+        log_push_indent()
 
         assert os.path.exists(p_path), "The component directory must exist!"
 
@@ -179,12 +178,12 @@ class HTMLTemplateRenderer:
                     continue
 
                 if file_name.endswith(".py"):
-                    logging.debug(f"Found `{file_path}` - Attempting to import and call `register_components(app)`")
+                    # log(f"Found `{file_path}` - Attempting to import and call `register_components(app)`")
                     
                     project_root_path: str = os.path.abspath(os.getcwd())
 
                     if not os.path.abspath(file_path).startswith(project_root_path):
-                        logging.warning(f"{file_path} is not in the same directory (or any of its children directories) and the project root - cannot import the module.")
+                        log(f"{file_path} is not in the same directory (or any of its children directories) and the project root - cannot import the module.")
                         continue
                     
                     module_path: str = \
@@ -199,7 +198,7 @@ class HTMLTemplateRenderer:
                             break
                     
                     if module_path_has_illegal_characters:
-                        logging.warning(f"Module path `{module_path}` has illegal characters. (Each part can only have A-Z, 0-9, and underscores. And must not begin with a number)")
+                        log(f"Module path `{module_path}` has illegal characters. (Each part can only have A-Z, 0-9, and underscores. And must not begin with a number)")
                         continue
 
                     component_registrar_module = importlib.import_module(module_path)
@@ -207,7 +206,7 @@ class HTMLTemplateRenderer:
                     if hasattr(component_registrar_module, "register_components"):
                         component_registrar_module.register_components(self)
                     else:
-                        logging.error(f"Module `{module_path}` has no function `register_components(html_renderer)` which usually registers the components.")
+                        log(f"Module `{module_path}` has no function `register_components(html_renderer)` which usually registers the components.")
                 
                 elif (
                     file_path.endswith(".html")
@@ -224,3 +223,5 @@ class HTMLTemplateRenderer:
                             file_path.removeprefix(p_path).removeprefix(os.sep),
                             simple_html_render_callback,
                     )
+        
+        log_pop_indent()

@@ -1,4 +1,7 @@
 import re
+import inspect
+
+from pathlib import Path
 
 
 
@@ -8,7 +11,6 @@ ANSI_TAG_REGEX: re.Pattern = re.compile(r"\[(.*?)\]")
 
 
 log_indent: int = 0
-log_prefix: str = ""
 
 
 
@@ -83,7 +85,8 @@ def ansi(p_text: str) -> str:
 
 def log(*p_args, **p_var_args) -> None:
     global log_indent
-    print(log_prefix, "\t" * log_indent, end="")
+    
+    print(Path(inspect.stack()[1].filename).name.rjust(20, " "), "|", "    " * log_indent, end="")
     print(*p_args, **p_var_args)
 
 
@@ -99,8 +102,3 @@ def log_push_indent() -> None:
 def log_pop_indent() -> None:
     global log_indent
     log_indent -= 1
-
-
-def log_set_prefix(p_prefix: str) -> None:
-    global log_prefix
-    log_prefix = p_prefix

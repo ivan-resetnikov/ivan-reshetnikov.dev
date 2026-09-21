@@ -1,6 +1,8 @@
+import datetime
+
 from pathlib import Path
 
-import datetime
+from ..scripting_commons.log import *
 
 
 
@@ -14,11 +16,13 @@ def ip_blacklist_load(p_path: str) -> None:
     global BLACKLISTED_IPS
 
 
+    log("Loading IP blacklist...")
+    log_push_indent()
+
+
     BLACKLIST_PATH = Path(p_path)
     assert BLACKLIST_PATH.exists()
 
-
-    print("Loading IP blacklist...")
 
     with open(BLACKLIST_PATH) as f:
         for line in f:
@@ -29,12 +33,18 @@ def ip_blacklist_load(p_path: str) -> None:
 
             BLACKLISTED_IPS.append(line)
 
-    print(f"{len(BLACKLISTED_IPS)} IPs blacklisted!")
+    log(f"{len(BLACKLISTED_IPS)} IPs blacklisted!")
+
+
+    log_pop_indent()
 
 
 def ip_blacklist_add(p_ip: str, p_offence: str="None specified") -> None:
     global BLACKLIST_PATH
     global BLACKLISTED_IPS
+
+
+    log(f"Blacklisted an IP - `{p_ip}` for `{p_offence}`")
 
 
     assert BLACKLIST_PATH

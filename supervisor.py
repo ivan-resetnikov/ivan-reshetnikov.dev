@@ -69,7 +69,7 @@ def ensure_server_killed() -> None:
 
 def supervise_until_KeyboardInterrupt() -> None:
     global server_process
-    
+
     set_up_environment()
 
 
@@ -107,5 +107,4 @@ def supervise_until_KeyboardInterrupt() -> None:
 
 
 if __name__ == "__main__":
-    log_set_prefix("[supervisor.py]")
     supervise_until_KeyboardInterrupt()

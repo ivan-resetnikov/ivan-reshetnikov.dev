@@ -6,16 +6,14 @@ import mimetypes
 import os
 import ssl
 import logging
-
-from collections.abc import Awaitable, Callable
 import traceback
-
-from typing import TypeAlias
 import urllib.parse
 
+from collections.abc import Awaitable, Callable
+from typing import TypeAlias
 
-
-Error = str
+from ..scripting_commons.log import *
+from ..scripting_commons.filesystem import size_as_human_readable
 
 
 
@@ -52,6 +50,21 @@ class HTTPRequest:
     def request_line(self) -> str:
         return f"{self.method} {self.url} {self.http_version}"
 
+
+    def log(self) -> None:
+        log("Request data:")
+        log_push_indent()
+
+        log(f"{self.ip}:")
+        log(f"{self.request_line}")
+
+        log_push_indent()
+        for cookie in self.cookies:
+            log(cookie)
+        log(f"+{ size_as_human_readable(len(self.body)) } body")
+        log_pop_indent()
+
+        log_pop_indent()
 
 
 class HTTPResponse:
@@ -145,16 +158,17 @@ class HTTPServer:
             p_port: int=8000,
             p_tls_cert_file: str|None=None,
             p_tls_key_file: str|None=None,
-    ) -> Error:
+    ) -> str:
         self.request_handler = p_HTTP_request_handler
 
-        logging.info(f"Starting HTTP server at `{p_ip}:{p_port}`")
+        log(f"Starting HTTP server at `{p_ip}:{p_port}`")
+        log_push_indent()
         
         try:
             ssl_context: ssl.SSLContext|None = None
 
             if p_tls_cert_file is not None and p_tls_key_file is not None:
-                logging.info("TLS certificate & key were provided! Proceeding with SSL.")
+                log("TLS certificate & key were provided! Proceeding with SSL.")
 
                 ssl_context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
 
@@ -170,13 +184,13 @@ class HTTPServer:
                 ssl=ssl_context,
             )
 
-            logging.info(f"Server up at `http://{p_ip}:{p_port}` (Press Ctrl+C to stop)")
+            log(f"Server up at `http://{p_ip}:{p_port}` (Press Ctrl+C to stop)")
 
             async with server:
                 await server.serve_forever()
 
         except OSError as error:
-            logging.exception(
+            log(
                     "OSError: errno=%r (%s), - %s",
                     error.errno,
                     errno.errorcode.get(error.errno) if error.errno is not None else "Unknown",
@@ -186,8 +200,11 @@ class HTTPServer:
             return "SERVER_START_FAIL"
         
         except Exception as e:
-            logging.error(f"Server error: {e}")
+            log(f"Server error: {e}")
             return "SERVER_ERROR"
+
+        finally:
+            log_pop_indent()
         
         return "OK"
 
@@ -196,7 +213,8 @@ class HTTPServer:
         assert self.request_handler
 
         try:
-            logging.debug(f"New client at `{writer.get_extra_info('peername')}`")
+            log(f"New client at `{writer.get_extra_info('peername')}`")
+            log_push_indent()
 
             # NOTE(vanya): HTTPRequest is a bundle of all the data of the HTTP request.
             request = HTTPRequest()
@@ -214,8 +232,6 @@ class HTTPServer:
             request.method = request_line_parts[0]
             request.url = request_line_parts[1]
             request.http_version = request_line_parts[2].strip() # NOTE(vanya): Remove trailing \r\n
-
-            logging.debug(f"Received request `{request.method} {request.url} {request.http_version}`")
 
             url_parts = urllib.parse.urlsplit(request.url)
             request.scheme = url_parts.scheme
@@ -249,6 +265,8 @@ class HTTPServer:
             if content_length > 0:
                 request.body = await reader.readexactly(content_length)
 
+            request.log()
+
             # NOTE(vanya): Get response from request handler
             response: HTTPResponse = await self.request_handler(request)
 
@@ -257,16 +275,18 @@ class HTTPServer:
             await writer.drain()
 
         except Exception as e:
-            logging.error(f"An error occured while handling the request above!")
-            logging.error("CALL STACK BEGIN".center(50, "-"))
+            log(f"An error occured while handling the request above!")
+            log_no_indent("CALL STACK BEGIN".center(50, "-"))
             traceback.print_exc()
-            logging.error("CALL STACK END".center(50, "-"))
-            logging.info(f"Serving error 500.")
+            log_no_indent("CALL STACK END".center(50, "-"))
+            log(f"Serving error 500.")
 
             writer.write(HTTPResponse().server_error(b"Server error").to_bytes())
             await writer.drain()
         
         finally:
-            logging.debug(f"Closing client connection")
+            log(f"Closing client connection")
+            log_pop_indent()
+
             writer.close()
             await writer.wait_closed()

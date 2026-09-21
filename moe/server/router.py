@@ -2,7 +2,8 @@ import asyncio
 import logging
 
 from collections.abc import Callable
-from fnmatch import fnmatch
+
+from ..scripting_commons.log import *
 
 from .http import HTTPServer, HTTPRequest, HTTPResponse, HTTPRequestHandlerType
 
@@ -75,7 +76,7 @@ class Router:
     def register_route(self, p_method: str, p_path: str, p_handler: HTTPRequestHandlerType) -> None:
         new_route = Route(p_method, p_path, p_handler)
 
-        logging.debug(f"Registering route `{p_method} {p_path}`")
+        log(f"Registering route `{p_method} {p_path}`")
 
         self.routes.append(new_route)
         self.method_routes[p_method] = self.method_routes.get(p_method, []) + [new_route]
@@ -94,7 +95,7 @@ class Router:
             return asyncio.run(self.http_server.serve_forever(self.HTTP_request_handler, p_ip, p_port, p_tls_cert_file, p_tls_key_file))
         
         except KeyboardInterrupt:
-            logging.info("Received KeyboardInterrupt, closing server.")
+            log("Received KeyboardInterrupt, closing server.")
             return "OK"
 
 
@@ -109,7 +110,8 @@ class Router:
 
         # NOTE(vanya): Match a route within the requested method
 
-        logging.debug(f"Matching routes for request: {p_request.request_line}")
+        log(f"Matching routes for request: {p_request.request_line}")
+        log_push_indent()
 
         for route in self.method_routes.get(p_request.method, []):
             route_parts = route.path.strip("/").split("/")
@@ -138,13 +140,15 @@ class Router:
                     break
 
             if not matched:
-                logging.debug(f"Route {route.path} rejected.")
+                log(f"Route {route.path} rejected.")
             else:
-                logging.debug(f"Route {route.path} matched with requested path {p_request.path}")
+                log(f"Route {route.path} matched with requested path {p_request.path}")
+                log_pop_indent()
 
                 return await route.callback(p_request, **route_args)
 
-        logging.error(f"No matching route found - serving error 404.")
+        log(f"No matching route found - serving error 404.")
+        log_pop_indent()
 
         return HTTPResponse.not_found(
             "404".encode("utf-8"),
