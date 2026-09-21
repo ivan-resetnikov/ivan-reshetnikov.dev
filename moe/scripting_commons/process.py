@@ -20,13 +20,13 @@ def resolve_shell_command(p_command: ShellCommand) -> list[str]:
 
     Ensures a list of elements of variable-types like str, pathlib.Path, bool, int are strings.
     While some types are resolved with particular methods. e.g:
-    - pathlib.Path will be resolved into a string with `.resolve()`
+    - pathlib.Path will be resolved into a string with `.absolute()`
 
     NOTE(vanya):
     The benefit of representing commands with these lists is not having to handle string-ification manually.
     """
     return [
-        str(token.resolve()) if isinstance(token, Path) else
+        str(token.absolute()) if isinstance(token, Path) else
         str(token)
         for token in p_command
     ]
@@ -91,15 +91,13 @@ def assert_shell_simple(p_intent_message: str, p_command: ShellCommand, p_error_
 
 
 def process_spawn(p_command: ShellCommand) -> subprocess.Popen:
-    print("Spawning process")
+    log("Spawning an asyncronous process")
 
     ensured_string_tokens: list[str] = resolve_shell_command(p_command)
 
     log(ansi(f"[italic]$ {" ".join(ensured_string_tokens)}"))
 
     process = subprocess.Popen(ensured_string_tokens)
-
-    print(process.pid)
 
     return process
 

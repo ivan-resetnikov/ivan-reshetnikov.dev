@@ -1,44 +1,78 @@
 import time
-
-from scripting_commons import *
-
 import subprocess
 
+from moe.scripting_commons import *
 
 
-UPDATE_INTERVAL: int = 1
+
+UPDATE_INTERVAL: int = 5
+
+
+
+git: str = ""
+server = Path()
+python3 = Path()
+
+out_of_date_file = Path(".out_of_date")
+server_process: subprocess.Popen|None = None
+
+
+
+def set_up_environment() -> None:
+    global git, server, python3
+
+
+    log("Setting up environment")
+    log_push_indent()
+
+
+    git = assert_bin("git")
+    server = assert_file("server.py")
+
+    python3 = venv_ensure(".venv")
+    venv_ensure_requirements(python3, "requirements.txt")
+
+
+    log_pop_indent()
+
+
+def is_server_up() -> bool:
+    global server_process
+
+    return isinstance(server_process, subprocess.Popen) and process_is_up(server_process)
+
+
+def is_up_to_date() -> bool:
+    global out_of_date_file
+
+    return not out_of_date_file.exists()
+
+
+def mark_up_to_date() -> None:
+    global out_of_date_file
+
+    log("Marking source as up-to-date")
+
+    if out_of_date_file.exists():
+        out_of_date_file.unlink()
+
+
+def ensure_server_killed() -> None:
+    global server_process
+
+    log("Killing server process")
+    if isinstance(server_process, subprocess.Popen) and process_is_up(server_process):
+        server_process.kill()
+        server_process = None
 
 
 
 def supervise_until_KeyboardInterrupt() -> None:
-    python3: str = assert_bin("python3")
-    git: str = assert_bin("git")
-    server: Path = assert_file("./server.py")
-    out_of_date_file = Path("./.out_of_date")
-
-    server_process: subprocess.Popen|None = None
+    set_up_environment()
 
 
-    # NOTE(vanya): Helper functions
-    def is_server_up() -> bool:
-        return isinstance(server_process, subprocess.Popen) and process_is_up(server_process)
-
-    def is_up_to_date() -> bool:
-        return not out_of_date_file.exists()
-
-    def mark_up_to_date() -> None:
-        log("Marking source as up-to-date")
-
-        if out_of_date_file.exists():
-            out_of_date_file.unlink()
-
-    def ensure_server_killed() -> None:
-        log("Killing server process")
-        if isinstance(server_process, subprocess.Popen) and process_is_up(server_process):
-            server_process.kill()
-
-
-    log("Supervising until KeyboardInterrupt...")
+    log("Supervising until KeyboardInterrupt")
+    log_push_indent()
 
     try:
         while True:
@@ -54,18 +88,22 @@ def supervise_until_KeyboardInterrupt() -> None:
             # NOTE(vanya): Ensure that the server process is up
             if not is_server_up():
                 log("Server process down! (Re-)starting...")
-                server_process = process_spawn([
-                    python3, server
-                ])
+                server_process = process_spawn(
+                    [
+                        python3, server
+                    ]
+                )
 
             time.sleep(UPDATE_INTERVAL)
+    
     except KeyboardInterrupt:
         log("Received KeyboardInterrupt, exiting supervisor.")
-
         ensure_server_killed()
-        
-        return
+
+    finally:
+        log_pop_indent()
 
 
 if __name__ == "__main__":
+    log_set_prefix("[supervisor.py]")
     supervise_until_KeyboardInterrupt()

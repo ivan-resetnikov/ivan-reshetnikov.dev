@@ -6,7 +6,13 @@ import hmac
 import os
 from time import monotonic
 
-from core import *
+from moe.server.http import *
+from moe.server.router import *
+from moe.server.html import *
+from moe.server.ip_blacklist import *
+from moe.server.dot_env import *
+from moe.server import crypto
+
 from components import *
 
 
@@ -66,7 +72,7 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
     ).hexdigest()
 
     if not signature or not hmac.compare_digest(signature, expected):
-        ip_blacklist.add(p_request.ip)
+        ip_blacklist_add(p_request.ip)
         return HTTPResponse.reject(b"Fuck off you impersonating fuck!")
 
     # NOTE(vanya): Mark current version as invalid to the supervisor by creating a file .out_of_date
@@ -83,11 +89,11 @@ async def _(p_request: HTTPRequest) -> HTTPResponse:
 
 @router.middleware()
 def _(p_request: HTTPRequest) -> bool:
-    if ip_blacklist.contains(p_request.ip):
+    if ip_blacklist_contains(p_request.ip):
         return False
 
     now: float = monotonic()
-    requests: list[float] = requests_last_minute.get(p_request.ip, None)
+    requests: list[float] = requests_last_minute.get(p_request.ip, [])
 
     if not requests:
         requests = []
@@ -109,7 +115,7 @@ def _(p_request: HTTPRequest) -> bool:
 
 
 if __name__ == "__main__":
-    dot_env.load(".env")
-    ip_blacklist.load("./ip_blacklist.txt")
+    dot_env_load(".env")
+    ip_blacklist_load("./ip_blacklist.txt")
     html.register_components_from_dir("./components")
     router.serve_until_KeyboardInterrupt("0.0.0.0", 8080, "./certificates/domain.cert.pem", "./certificates/private.key.pem")

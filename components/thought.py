@@ -5,7 +5,7 @@ import os
 import re
 import pathlib
 
-import core
+import moe.server as server
 
 
 
@@ -100,7 +100,7 @@ class Thought:
         """
 
 
-def register_components(p_template_renderer: core.HTMLTemplateRenderer) -> None:
+def register_components(p_template_renderer: server.HTMLTemplateRenderer) -> None:
 
     @p_template_renderer.component("thought")
     def _(name: str) -> str:

@@ -9,7 +9,7 @@ BLACKLISTED_IPS: list[str] = []
 
 
 
-def load(p_path: str) -> None:
+def ip_blacklist_load(p_path: str) -> None:
     global BLACKLIST_PATH
     global BLACKLISTED_IPS
 
@@ -32,7 +32,7 @@ def load(p_path: str) -> None:
     print(f"{len(BLACKLISTED_IPS)} IPs blacklisted!")
 
 
-def add(p_ip: str, p_offence: str="None specified") -> None:
+def ip_blacklist_add(p_ip: str, p_offence: str="None specified") -> None:
     global BLACKLIST_PATH
     global BLACKLISTED_IPS
 
@@ -59,5 +59,5 @@ def add(p_ip: str, p_offence: str="None specified") -> None:
         )
 
 
-def contains(p_ip: str) -> bool:
+def ip_blacklist_contains(p_ip: str) -> bool:
     return p_ip in BLACKLISTED_IPS

@@ -5,7 +5,7 @@ import os
 
 import PIL.Image
 
-import core
+import moe.server as server
 
 
 
@@ -73,7 +73,7 @@ class Image:
             """
 
 
-def register_components(p_template_renderer: core.HTMLTemplateRenderer) -> None:
+def register_components(p_template_renderer: server.HTMLTemplateRenderer) -> None:
     @p_template_renderer.component("image")
     def _(
             path: str,

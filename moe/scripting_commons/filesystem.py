@@ -6,7 +6,7 @@ from typing import TypeAlias
 from .log import *
 
 
-PathLike: TypeAlias = str | Path
+PathLike: TypeAlias = str|Path
 
 
 def ensure_path_as_string(p_path: PathLike) -> str:
@@ -31,34 +31,50 @@ def ensure_dir(p_path: PathLike, p_message: bool=True) -> Path:
     return p_path
 
 
-def assert_dir(p_path: PathLike) -> Path:
+def assert_dir(p_path: PathLike, p_message: bool=True) -> Path:
     p_path = ensure_path_as_pathlib_Path(p_path)
 
-    log(ansi(f"[dim white]Asserting dir exists @ {p_path}"))
+    if p_message:
+        log(ansi(f"[dim white]Asserting dir exists @ {p_path}"))
+
     assert p_path.exists() and p_path.is_dir(), ansi("[red fg]A directory does not exist at the path above!")
     return p_path
 
 
-def assert_file(p_path: PathLike) -> Path:
+def assert_file(p_path: PathLike, p_message: bool=True) -> Path:
     p_path = ensure_path_as_pathlib_Path(p_path)
 
-    log(ansi(f"[dim white]Asserting file exists @ {p_path}"))
+    if p_message:
+        log(ansi(f"[dim white]Asserting file exists @ {p_path}"))
+    
     assert p_path.exists() and p_path.is_file(), ansi("[red fg]A file does not exist at the path above!")
     return p_path
 
 
-def copy(p_source_path: PathLike, p_dest_path: PathLike) -> Path:
+def assert_not_exists(p_path: PathLike, p_message: bool=True) -> Path:
+    p_path = ensure_path_as_pathlib_Path(p_path)
+
+    if p_message:
+        log(ansi(f"[dim white]Asserting nothing exists @ {p_path}"))
+    assert not p_path.exists(), ansi("[red fg]Something exists at the path above!")
+    return p_path
+
+
+def copy(p_source_path: PathLike, p_dest_path: PathLike, p_message: bool=True) -> Path:
     p_source_path = ensure_path_as_pathlib_Path(p_source_path)
     p_dest_path = ensure_path_as_pathlib_Path(p_dest_path)
 
-    log(f"Ensuring a copy of {p_source_path.name} @ {p_dest_path.parent}")
+    if p_message:
+        log(f"Ensuring a copy of {p_source_path.name} @ {p_dest_path.parent}")
 
     p_dest_path.write_bytes(p_source_path.read_bytes())
     return p_dest_path
 
 
-def assert_bin(p_binary_file_name: str) -> str:
-    log(ansi(f"[dim white]Asserting binary dependency \"{p_binary_file_name}\""))
+def assert_bin(p_binary_file_name: str, p_message: bool=True) -> str:
+    if p_message:
+        log(ansi(f"[dim white]Asserting binary dependency \"{p_binary_file_name}\""))
+    
     found_path: str|None = shutil.which(p_binary_file_name)
     assert found_path, ansi(f"[red fg]`{p_binary_file_name}` is a mandatory dependency!")
     return found_path

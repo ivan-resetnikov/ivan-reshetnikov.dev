@@ -1,203 +1,226 @@
-from __future__ import annotations
-from collections.abc import Callable
-
 import importlib
 import logging
-import re
 import os
+import re
+import shlex
 
+from collections.abc import Callable
+from typing import Any
+
+from .http import HTTPResponse
+
+
+ComponentCallbackType = Callable[[list[str], dict[str, str]], str]
 
 
 def is_valid_python_module_name(p_name: str) -> bool:
     return re.match(r"^[A-Za-z_][A-Za-z0-9_]*$", p_name) != None
 
 
-
 class Component:
     def __init__(self):
         self.name: str = ""
-        self.render_callback: Callable = None
+        self.callback: ComponentCallbackType|None = None
 
 
-class HTMLRenderer:
-    logger: logging.Logger = logging.getLogger("RenderingEngine")
-    logger.setLevel(logging.DEBUG)
-
-
+class HTMLTemplateRenderer:
     def __init__(self) -> None:
         self.components: list[Component] = []
-    
+
 
     def component(self, p_name: str) -> Callable:
+        """ A decorator to register a component. """
 
         def definition_wrapper(p_decorated_function: Callable) -> Callable:
 
-            def call_wrapper(p_args: dict[str, str], p_paste_keys: dict[str, str] = None) -> str:
-                return p_decorated_function(p_args)
+            def call_wrapper(*p_args, **p_kwargs) -> str:
+                return p_decorated_function(*p_args, **p_kwargs)
 
             self.register_component(p_name, call_wrapper)
 
             return call_wrapper
 
+        logging.info(f"Registered component `{p_name}`")
+
         return definition_wrapper
 
-
-    def render(self, p_source: str, p_paste_keys: dict[str, str]={}) -> str:
+    
+    def render(self, p_source: str, **p_kwargs: dict) -> str:
         rendered_source: str = p_source
 
-        # NOTE(vanya): Replace all component syntax with registered components until none are lefr
+        # NOTE(vanya): Replace all component syntax with registered components and kwargs until none are left
         while True:
-            # NOTE(vanya): Match component syntax across multiple lines
-            component_regex_match = re.search(r"\{\{.*?\}\}", rendered_source, re.S)
-            
-            if component_regex_match == None:
-                # NOTE(vanya): No components left to replace
+            # NOTE(vanya): Match syntax
+            regex_match = re.search(r"<!--\s*\$.*?-->", rendered_source, re.S)
+
+            if regex_match == None:
+                # NOTE(vanya): No syntax left to replace
                 break
             
-            replace_str: str = ""
 
-            # NOTE(vanya): Parse component syntax
-            component_syntax: str = component_regex_match.group(0)
-            component_inner_syntax: str = component_syntax.removeprefix("{{").removesuffix("}}").strip()
+            def replace_match(p_text: str) -> None:
+                nonlocal rendered_source
+                rendered_source = (
+                    rendered_source[:regex_match.start()]
+                    + p_text
+                    + rendered_source[regex_match.end():]
+                )
 
-            args = dict(re.findall(r'(\w+)="([^"]*)"', component_inner_syntax))
+            # NOTE(vanya): Parse syntax innards
 
-            requested_component_name: str = component_inner_syntax.split(None, 1)[0]
+            component_syntax: str = regex_match.group(0)
+            component_inner_syntax: str = (
+                component_syntax
+                .strip()
+                .removeprefix("<!--")
+                .removesuffix("-->")
+                .strip()
+            )
+
+
+            # NOTE(vanya): Parse positional-arguments and key-arguments
+
+            parts: list[str] = shlex.split(component_inner_syntax)
+
+            if not parts:
+                logging.warning(f"Empty component syntax! {component_syntax}")
+
+                # NOTE(vanya): Remove malformed syntax so it isn't matched forever.
+                replace_match("")
+                continue
+
+
+            # NOTE(vanya): Parse component name
+
+            requested_component_name: str = parts.pop(0).removeprefix("$")
+
+            args: list = []
+            kwargs: dict = {}
+            
+            for part in parts:
+                if "=" in part:
+                    key, value = part.split("=", 1)
+                    kwargs[key] = value
+                else:
+                    args.append(part)
 
             if not requested_component_name:
-                self.logger.warning(f"Component syntax without a component name! `{component_syntax}` `{requested_component_name}`")
+                logging.warning(f"Component syntax without a component name! `{component_syntax}` `{requested_component_name}`")
 
             # NOTE(vanya): Search for a component to render the replacement
-            found_requested_component: bool = False
-            for component in self.components:
-                if component.name == requested_component_name:
-                    # NOTE(vanya): Call component rendering function with argments and renderpass parameters
-                    replace_str = component.render_callback(args, p_paste_keys)
 
-                    found_requested_component = True
-                    break
+            component_found: bool = False
             
-            if not found_requested_component:
-                if requested_component_name in p_paste_keys:
-                    replace_str = str(p_paste_keys[requested_component_name])
-                else:
-                    self.logger.error(f"Could not find a requested component `{requested_component_name}`.")
+            for component in self.components:
+                if component.name != requested_component_name:
+                    continue
 
-            # NOTE(vanya): Replace HTML source
-            rendered_source = rendered_source[:component_regex_match.start()] + replace_str + rendered_source[component_regex_match.end():]
+                component_found = True
+
+                if component.callback:
+                    # NOTE(vanya): Call the component rendering function with the passed args and kwargs from HTML
+                    replace_match(component.callback(*args, **kwargs))
+                else:
+                    logging.warning(f"The found component does not have an assigned callback! \"{requested_component_name}\"")
+
+                break
+
+            if component_found:
+                continue
+
+
+            # NOTE(vanya): If the component was not found, check if it is in the kwargs and replace it with that instead.
+            if requested_component_name in p_kwargs:
+                replace_match(str(p_kwargs[requested_component_name]))
+                continue
+
+            
+            logging.error(f"Could not find a component or a rendering parameter! - {requested_component_name}")
+
+            # NOTE(vanya): Remove the failed syntax so it isn't matched forever.
+            replace_match("")
 
         return rendered_source
-    
 
-    def render_file(self, p_path: str, p_paste_keys: dict[str, str]={}) -> str:
+
+    def render_file(self, p_path: str, **p_kwargs: Any) -> str:
         with open(p_path, "r", encoding="utf-8") as f:
-            return self.render(f.read(), p_paste_keys)
-    
+            return self.render(f.read(), **p_kwargs)
 
-    def register_component(self, p_name: str, p_render_callback: Callable) -> None:
+
+    def render_file_response(self, p_path: str, **p_kwargs: Any) -> HTTPResponse:
+        if os.path.exists(p_path):
+            return HTTPResponse.ok(self.render_file(p_path, **p_kwargs).encode("utf-8"), "text/html; charset=utf-8")
+        else:
+            logging.error(f"Cannot render an html file - does not exist @ {p_path}")
+            return HTTPResponse.not_found(b"404", "text/html; charset=utf-8")
+
+
+    def register_component(self, p_name: str, p_callback: ComponentCallbackType) -> None:
         new_component = Component()
         new_component.name = p_name
-        new_component.render_callback = p_render_callback
+        new_component.callback = p_callback
 
         self.components.append(new_component)
 
-        self.logger.debug(f"Registered component `{p_name}`")
+        logging.debug(f"Registered component - {p_name}")
 
 
     def register_components_from_dir(self, p_path: str) -> None:
-        self.logger.debug(f"Scanning directory `{p_path}` to register components.")
+        logging.debug(f"Scanning directory to register components @ {p_path}")
 
-        for p_dir_path, p_dir_names, p_file_names in os.walk(p_path):
-            for file_name in p_file_names:
-                file_path: str = os.path.join(p_dir_path, file_name)
+        assert os.path.exists(p_path), "The component directory must exist!"
 
-                if os.path.isfile(file_path):
-                    if file_name.endswith(".py"):
-                        self.logger.debug(f"Found `{file_path}` - Attempting to import and call `register_components(app)`")
-                        
-                        project_root_path: str = os.path.abspath(os.getcwd())
+        for dir_path, dir_names, file_names in os.walk(p_path):
+            for file_name in file_names:
+                file_path: str = os.path.join(dir_path, file_name)
 
-                        if not os.path.abspath(file_path).startswith(project_root_path):
-                            self.logger.warning(f"{file_path} is not in the same directory (or any of its children directories) and the project root - cannot import the module.")
-                            continue
-                        
-                        module_path: str = \
-                            os.path.relpath(file_path, project_root_path) \
-                            .replace(os.sep, ".") \
-                            .removesuffix(".py")
-                        
-                        module_path_has_illegal_characters: bool = False
-                        for module_path_part in module_path.split("."):
-                            if not is_valid_python_module_name(module_path_part):
-                                module_path_has_illegal_characters = True
-                                break
-                        
-                        if module_path_has_illegal_characters:
-                            self.logger.warning(f"Module path `{module_path}` has illegal characters. (Each part can only have A-Z, 0-9, and underscores. And must not begin with a number)")
-                            continue
+                if not os.path.isfile(file_path):
+                    continue
 
-                        component_registrar_module = importlib.import_module(module_path)
-                        
-                        if hasattr(component_registrar_module, "register_components"):
-                            component_registrar_module.register_components(self)
-                        else:
-                            self.logger.error(f"Module `{module_path}` has no function `register_components(html_renderer)` which usually registers the components.")
+                if file_name.endswith(".py"):
+                    logging.debug(f"Found `{file_path}` - Attempting to import and call `register_components(app)`")
                     
-                    elif file_path.endswith(".html"):
-                        def simple_html_render_callback(p_args: dict, p_paste_keys: dict[str, str] = None, p_file_path: str=file_path) -> str:
-                            return self.render_file(p_file_path, p_paste_keys or {})
+                    project_root_path: str = os.path.abspath(os.getcwd())
 
-                        self.register_component(file_path.removeprefix(p_path).removeprefix(os.sep), simple_html_render_callback)
+                    if not os.path.abspath(file_path).startswith(project_root_path):
+                        logging.warning(f"{file_path} is not in the same directory (or any of its children directories) and the project root - cannot import the module.")
+                        continue
+                    
+                    module_path: str = \
+                        os.path.relpath(file_path, project_root_path) \
+                        .replace(os.sep, ".") \
+                        .removesuffix(".py")
+                    
+                    module_path_has_illegal_characters: bool = False
+                    for module_path_part in module_path.split("."):
+                        if not is_valid_python_module_name(module_path_part):
+                            module_path_has_illegal_characters = True
+                            break
+                    
+                    if module_path_has_illegal_characters:
+                        logging.warning(f"Module path `{module_path}` has illegal characters. (Each part can only have A-Z, 0-9, and underscores. And must not begin with a number)")
+                        continue
 
+                    component_registrar_module = importlib.import_module(module_path)
+                    
+                    if hasattr(component_registrar_module, "register_components"):
+                        component_registrar_module.register_components(self)
+                    else:
+                        logging.error(f"Module `{module_path}` has no function `register_components(html_renderer)` which usually registers the components.")
+                
+                elif (
+                    file_path.endswith(".html")
+                    or file_path.endswith(".htm")
+                ):
+                    def simple_html_render_callback(
+                            *args: str,
+                            p_file_path: str=file_path,
+                            **kwargs: Any,
+                    ) -> str:
+                        return self.render_file(p_file_path)
 
-
-class HTML:
-    def __init__(self):
-        self.parent: HTML|None = None
-        self.children: list[HTML|str] = []
-        self.name: str = ""
-        self.attributes: dict = {}
-    
-
-    def push_element(self, p_name: str, p_content: HTML|str|None=None, **p_html_attrs) -> HTML:
-        e = HTML()
-        e.name = p_name
-
-        # NOTE(vanya): Assign content
-        if p_content is not None:
-            e.children.append(p_content)
-
-        # NOTE(vanya): Assign parent
-        e.parent = self
-        self.children.append(e)
-
-        # NOTE(vanya): Assign attributes
-        for key, value in p_html_attrs.items():
-            if key == "class_":
-                e.attributes["class"] = value
-            elif key == "id_":
-                e.attributes["id"] = value
-            else:
-                e.attributes[key] = value
-
-        return e
-
-
-    def render_html(self) -> str:
-        # NOTE(vanya): Stringify the attributes
-        attribute_source: str = ""
-
-        for key, value in self.attributes.items():
-            attribute_source += f" {key}=\"{value}\""
-
-        # NOTE(vanya): Render children (Potentially recursive)
-        inner_html: str = ""
-
-        for child in self.children:
-            if isinstance(child, str):
-                inner_html += child
-            
-            if isinstance(child, HTML):
-                inner_html += child.render_html()
-
-        return f"<{self.name}{attribute_source}>{inner_html}</{self.name}>"
+                    self.register_component(
+                            file_path.removeprefix(p_path).removeprefix(os.sep),
+                            simple_html_render_callback,
+                    )

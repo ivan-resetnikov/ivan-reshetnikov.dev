@@ -2,7 +2,7 @@ import os
 
 
 
-def load(p_path: str) -> None:
+def dot_env_load(p_path: str) -> None:
     with open(p_path) as f:
         for line in f:
             line = line.strip()
