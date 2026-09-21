@@ -87,7 +87,10 @@ def _(p_request: HTTPRequest) -> bool:
         return False
 
     now: float = monotonic()
-    requests: list[float] = requests_last_minute[p_request.ip]
+    requests: list[float] = requests_last_minute.get(p_request.ip, None)
+
+    if not requests:
+        requests = []
 
     # Remove requests older than one minute.
     requests[:] = [

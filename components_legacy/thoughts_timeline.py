@@ -101,3 +101,5 @@ def register_components_for_app(p_app: App) -> None:
                 html_source.push_element(None, "article", post.render_html(), class_="post", id_=f"post-{file_name[:file_name.rfind(".")]}")
 
         return html_source.render_html()
+
+

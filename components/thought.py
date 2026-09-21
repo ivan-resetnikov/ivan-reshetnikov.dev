@@ -75,35 +75,51 @@ class Thought:
     def render_html(self) -> str:
         #{ f"<h3>{ self.title }</h3>" if self.title else "" }
 
-        if self.is_personal:
-            return f"""
-                <article class="thought" id="thought-{ self.name }">
-                    <p>This thought is too personal to show on the Internet (⁄ ⁄•⁄ω⁄•⁄ ⁄)⁄ </p>
-                </article>
-            """
-        else:
-            return f"""
-                <article class="thought" id="thought-{ self.name }">
-                    <table>
-                        <tr>
-                            <th>
-                                <img src="/public/pictures/pfp.png" class="pfp">
-                            </th>
-                            <td>
-                                <p style="margin: 0">
-                                    <b>@vanya</b><br>
-                                    thought on
-                                    <time datetime="{ self.creation_datetime.isoformat() }">{ format_datetime_as_human_readable(self.creation_datetime) }</time>
-                                </p>
-                            </td>
-                        </tr>
-                    </table>
-                    { self.body }
-                </article>
-            """
+        return f"""
+            <article class="thought" id="thought-{ self.name }">
+                <table>
+                    <tr>
+                        <th>
+                            <img src="/public/pictures/pfp.png" class="pfp">
+                        </th>
+                        <td>
+                            <p style="margin: 0">
+                                <b>@vanya</b><br>
+                                thought on
+                                <time datetime="{ self.creation_datetime.isoformat() }">{ format_datetime_as_human_readable(self.creation_datetime) }</time>
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+                {
+                    self.body
+                    if not self.is_personal else
+                    "<p>███████<br>This thought is too personal to show on the Internet (⁄ ⁄•⁄ω⁄•⁄ ⁄)⁄ </p>"
+                }
+            </article>
+        """
 
 
 def register_components(p_template_renderer: core.HTMLTemplateRenderer) -> None:
-    @p_template_renderer.component("post")
+
+    @p_template_renderer.component("thought")
     def _(name: str) -> str:
         return Thought.from_html("./thoughts/" + name + ".html").render_html()
+
+
+    @p_template_renderer.component("thoughts_timeline")
+    def _() -> str:
+        thoughts_source: str = ""
+
+        for file_name in reversed(os.listdir("./thoughts/")):
+            file_path: str = os.path.join("./thoughts/", file_name)
+
+            if (
+                not os.path.isfile(file_path)
+                or not file_path.endswith(".html")
+            ):
+                continue
+
+            thoughts_source += Thought.from_html(file_path).render_html()
+
+        return thoughts_source
