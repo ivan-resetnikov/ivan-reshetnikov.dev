@@ -68,6 +68,8 @@ def ensure_server_killed() -> None:
 
 
 def supervise_until_KeyboardInterrupt() -> None:
+    global server_process
+    
     set_up_environment()
 
 
