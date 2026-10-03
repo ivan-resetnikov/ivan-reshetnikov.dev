@@ -5,7 +5,7 @@ import os
 import re
 import pathlib
 
-import moe.server as server
+import moe.server.html
 
 
 
@@ -100,7 +100,7 @@ class Thought:
         """
 
 
-def register_components(p_template_renderer: server.HTMLTemplateRenderer) -> None:
+def register_components(p_template_renderer: moe.server.html.HTMLTemplateRenderer) -> None:
 
     @p_template_renderer.component("thought")
     def _(name: str) -> str:
@@ -109,9 +109,8 @@ def register_components(p_template_renderer: server.HTMLTemplateRenderer) -> Non
 
     @p_template_renderer.component("thoughts_timeline")
     def _() -> str:
-        thoughts_source: str = ""
-
-        for file_name in reversed(os.listdir("./thoughts/")):
+        thoughts: list[Thought] = []
+        for file_name in os.listdir("./thoughts/"):
             file_path: str = os.path.join("./thoughts/", file_name)
 
             if (
@@ -120,6 +119,12 @@ def register_components(p_template_renderer: server.HTMLTemplateRenderer) -> Non
             ):
                 continue
 
-            thoughts_source += Thought.from_html(file_path).render_html()
+            thoughts.append(Thought.from_html(file_path))
+
+        thoughts.sort(key=lambda thought: thought.creation_datetime)
+
+        thoughts_source: str = ""
+        for thought in reversed(thoughts):
+            thoughts_source += thought.render_html()
 
         return thoughts_source
