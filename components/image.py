@@ -61,7 +61,7 @@ class Image:
             alt_attr: str = f'alt="The image did not load ( yet (т人т) ), the description says: { self.alt }"' if self.alt else ""
             
             return f"""
-                <img class="very-lazy-img" loading="lazy" decoding="async" { alt_attr } width="{ self.width }" height="{ self.height }" path="{ self.path.removeprefix(".") }">
+                <a href="{ self.path.removeprefix(".") }" target="_blank" rel="noopener noreferrer"><img class="very-lazy-img" loading="lazy" decoding="async" { alt_attr } width="{ self.width }" height="{ self.height }" path="{ self.path.removeprefix(".") }"></a>
                 <noscript><img loading="lazy" decoding="async" { alt_attr } src="{ self.path.removeprefix(".") }"></noscript>
             """
         
