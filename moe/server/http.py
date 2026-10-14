@@ -184,7 +184,7 @@ class HTTPServer:
                 ssl=ssl_context,
             )
 
-            log(f"Server up at `http://{p_ip}:{p_port}` (Press Ctrl+C to stop)")
+            log(f"Server up at `http{ "s" if ssl_context else "" }://{p_ip}:{p_port}` (Press Ctrl+C to stop)")
 
             async with server:
                 await server.serve_forever()

@@ -1,11 +1,14 @@
 body {
     text-rendering: optimizeLegibility;
     
-    font-family: Open Sans, Arial;
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, system-ui, sans-serif;
+    /* font-family: Open Sans, Arial; */
     line-height:1.4;
 
     background-color: #fdebf4;
     color: #444;
+
+    /* background-image: url("/public/pictures/wallpaper.png"); */
 }
 
 main {
@@ -76,16 +79,93 @@ time {
 }
 
 
-.window {
-    border: 2px solid #000;
-    box-shadow:
-        0 0 0 4px #f686bd,
-        0 0 0 6px #000,
-        8px 8px 0 6px #433a663a;
-    margin: calc(4px + 1rem);
+
+.window,
+figure img,
+figure video {
+    --radius: 8px;
+    --glass-opacity: 0.5;
+
+    position: relative;
+    isolation: isolate;
     
     padding: 1rem;
-    background-color: #f7f7f7;
+    border-radius: .5rem;
+    margin: .5rem;
+
+    background:
+        url("/public/pictures/frosted_glass_noise.png"),
+        linear-gradient(
+            104deg,
+            transparent 26%,
+            rgba(255, 255, 255, 0.5) 42%,
+            rgba(255, 255, 255, 0.2) 50%,
+            transparent 64%
+        ),
+        linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.68),
+            rgba(255, 255, 255, 0.2) 50%,
+            transparent 54%
+        ),
+        linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.12),
+            rgba(0, 0, 0, 0.12)
+        ),
+        color-mix(
+            in srgb,
+            var(--glass-color) calc(var(--glass-opacity) * 100%),
+            transparent
+        );
+    
+    backdrop-filter: blur(4px);
+
+    box-shadow:
+        0 0 1rem rgba(0, 0, 0, 0.5),
+        0 0 .5rem var(--glass-color),
+        0 0 0 1px rgba(0, 0, 0, 0.55),
+        inset 0 0 0 1px #fff,
+        inset 0 0 30px #ffffff40;
+}
+
+.window::before,
+figure img::before,
+figure video::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background:
+        /* #fff; */
+        linear-gradient(
+            to bottom,
+            #fff,
+            #f5f5f5
+        );
+    
+    /* border-radius: .3rem; */
+    border: 1px solid #444;
+    margin: .5rem;
+}
+
+.window {
+    --glass-color: #f686bd;
+}
+
+figure img,
+figure video {
+    width: 100%;
+    padding: .5rem;
+}
+
+figure img {
+    --glass-color: #f6e386;
+}
+
+figure video {
+    --glass-color: #86def6;
 }
 
 
@@ -174,35 +254,11 @@ time {
 }
 
 
-figure img {
-    width: 100%;
-
-    border: 2px solid #000;
-    box-shadow:
-        0 0 0 4px #dfe2b3,
-        0 0 0 6px #000,
-        8px 8px 0 6px #433a663a;
-    
-        margin-bottom: 1rem;
-}
-
-figure video {
-    width: 100%;
-
-    /* border: 6px solid transparent; */
-    box-shadow:
-        0 0 0 2px #000,
-        0 0 0 6px #b3dee2,
-        0 0 0 8px #000,
-        8px 8px 0 6px #433a663a;
-    
-    margin-bottom: 1rem;
-}
-
 .pfp {
     width: calc(16px * 2);
     image-rendering: pixelated;
 }
+
 
 .figure-row {
     display: grid;
@@ -311,12 +367,11 @@ code {
 .very-lazy-img {
     height: auto;
 
-    display: grid;
+    display: grid; /* NOTE(vanya): Makes the image not fold */
     place-items: center;
     text-align: center;
-    
-    background-color: #fdebf4;
-    color: #f686bd;
+
+    color: #444;
 }
 
 
@@ -336,4 +391,98 @@ code {
     position: relative;
     top: calc(-1.4rem * 0.5 - 0.15rem);
     font-weight: bold;
+}
+
+
+/* CD disc */
+
+.disc {
+    position: absolute;
+    
+    width: 100vw;
+    height: 100vw;
+    
+    top: -50vw;
+    left: 50%;
+    transform: translateX(-50%);
+
+    z-index: -1;
+
+    border-radius: 50%;
+    -webkit-animation: spin 6s linear infinite;
+    animation: spin 6s linear infinite;
+
+    box-shadow: 0 0 4em white;
+}
+
+
+*:has(> .disc) {
+    overflow: clip;
+}
+
+
+@-webkit-keyframes spin {
+  to {
+    transform: translateX(-50%) rotate(1turn);
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: translateX(-50%) rotate(1turn);
+  }
+}
+
+.cd {
+    background-image:
+        radial-gradient(
+            circle,
+            #ccc 0,
+            #ccc 10%,
+            #0A0A0A33 0,
+            #0A0A0A33 11.5%,
+            #ffffff40 0,
+            #ffffff40 17%,
+            #0A0A0A0D 0,
+            #0A0A0A0D 17.5%,
+            #ffffff40 0,
+            #ffffff40 20%,
+            #0A0A0A0D 0,
+            #0A0A0A0D 20.5%,
+            #ffffff40 0,
+            #ffffff40 25%,
+            #0A0A0A33 0,
+            #0A0A0A33 30%,
+            #00000000 0,
+            #00000000 69.5%,
+            #0A0A0A26 0,
+            #0A0A0A33 100%),
+            conic-gradient(
+                #ffffff,
+                #f5e1f6,
+                #ffefd1,
+                #fefec5,
+                #c8c8c8,
+                #77ffdb,
+                #ca4eb7,
+                #704864,
+                #3b49ac,
+                #31c8de,
+                #6cd399,
+                #d0d0d0,
+                #fcfcfc,
+                #ffffff,
+                #ffffff,
+                #eafae9,
+                #a3ffef,
+                #98bcea,
+                #7fe460,
+                #a6c175,
+                #e2a3a7,
+                #ffc336,
+                #f0ed5b,
+                #d4d4d4,
+                #ffffff,
+                #ffffff
+            );
 }
