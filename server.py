@@ -112,6 +112,7 @@ def _(p_request: HTTPRequest) -> bool:
 
 
 if __name__ == "__main__":
+    Video.prepare_all_video_thumbnails()
     dot_env_load(".env")
     ip_blacklist_load("./ip_blacklist.txt")
     html.register_components_from_dir("./components")

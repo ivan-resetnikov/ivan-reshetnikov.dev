@@ -15,8 +15,8 @@ class Image:
     height: int = 0
     alt: str = ""
 
-    @classmethod
-    def from_file(self, p_path: str, p_alt: str="") -> Image|None:
+    @staticmethod
+    def from_file(p_path: str, p_alt: str="") -> Image|None:
         if not os.path.exists(p_path):
             print(f"Tried to load an image that does not exist: `{p_path}`")
             return None
